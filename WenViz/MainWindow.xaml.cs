@@ -23,6 +23,7 @@ namespace WenViz
         public MainWindow()
         {
             InitializeComponent();
+    //        System.Diagnostics.Debug.WriteLine("Hello World");
         }
     }
 }
