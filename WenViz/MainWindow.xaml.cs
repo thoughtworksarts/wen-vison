@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using CoordinateParser;
 
 namespace WenViz
 {
@@ -23,7 +24,10 @@ namespace WenViz
         public MainWindow()
         {
             InitializeComponent();
-    //        System.Diagnostics.Debug.WriteLine("Hello World");
+
+            //This is just an idea to get it going, to see if I could see the output, but it's not working because the build won't compile...
+            CoordinateParser parser = new CoordinateParser();
+            float[,] coordinates = parser.GetCoordinates("dummy_data.txt");
         }
     }
 }
