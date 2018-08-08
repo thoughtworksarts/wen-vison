@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WenViz", "WenViz\WenViz.csproj", "{CE84F0C6-888A-465F-A4EC-677B43709777}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WenLibrary", "WenLibrary\WenLibrary.csproj", "{C1A1BC73-0FE9-4D9A-B9B0-A161BB5942DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{CE84F0C6-888A-465F-A4EC-677B43709777}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE84F0C6-888A-465F-A4EC-677B43709777}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE84F0C6-888A-465F-A4EC-677B43709777}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1A1BC73-0FE9-4D9A-B9B0-A161BB5942DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1A1BC73-0FE9-4D9A-B9B0-A161BB5942DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1A1BC73-0FE9-4D9A-B9B0-A161BB5942DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1A1BC73-0FE9-4D9A-B9B0-A161BB5942DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

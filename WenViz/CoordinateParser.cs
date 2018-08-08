@@ -29,7 +29,7 @@ namespace WenViz
         public float[,] GetCoordinates(string filename)
         {
             //Read the text file
-            TextReader rdr = new StreamReader("dummy_data.txt");
+            TextReader rdr = new StreamReader(filename);
 
             //dynamic loop that while there are more lines in the text file, add to the array
 
