@@ -24,18 +24,20 @@ namespace WenViz
         public MainWindow()
         {
             InitializeComponent();
+            TestParser();
+        }
 
-            //This is just an idea to get it going, to see if I could see the output, but it's not working because the build won't compile...
+        private void TestParser()
+        {
             CoordinateParser parser = new CoordinateParser();
             List<float[]> coordinates = parser.GetCoordinates("dummy_data1.txt");
 
-            //print out the coordinates to test out parser
-            for(int i = 0; i < coordinates.Count; i++)
+            for (int i = 0; i < coordinates.Count; i++)
             {
                 var coords = coordinates[i];
 
                 Console.WriteLine("Current set of coordinates: ");
-                for(int j = 0; j < coords.Length; j++)
+                for (int j = 0; j < coords.Length; j++)
                 {
                     Console.WriteLine(j + ". " + coords[j]);
                 }
