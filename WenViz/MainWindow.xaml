@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WenViz"
         mc:Ignorable="d"
-        Title="WEN Visualizer" Height="600" Width="800">
+        Title="WEN Visualizer" Height="600" Width="800"
+        Loaded="MainWindow_Loaded"
+        Closing="MainWindow_Closing">
+    
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
         <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f" />
@@ -16,13 +19,21 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Viewbox Grid.Row="1" HorizontalAlignment="Center">
-            <Image Source="{Binding PersonImageSource}" Stretch="UniformToFill" />
-        </Viewbox>
-
-        <StatusBar Grid.Row="2" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="White" Foreground="{StaticResource MediumGreyBrush}">
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition  Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Viewbox Grid.Column="0" HorizontalAlignment="Center">
+                <Image Source="{Binding WENArmImageSource}" Stretch="UniformToFill" />
+            </Viewbox> 
+            <Viewbox Grid.Column="2" HorizontalAlignment="Center">
+                <Image Source="{Binding PersonImageSource}" Stretch="UniformToFill" />
+            </Viewbox>
+        </Grid>
+        <StatusBar Grid.Row="2" HorizontalAlignment="Stretch" Name="statusBar" VerticalAlignment="Bottom" Background="Red" Foreground="{StaticResource MediumGreyBrush}">
             <StatusBarItem Content="{Binding KinectStatusText}" />
         </StatusBar>
     </Grid>

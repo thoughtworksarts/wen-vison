@@ -83,7 +83,7 @@ namespace WenViz
         /// <summary>
         /// Drawing group for WEN arm rendering output
         /// </summary>
-        private DrawingGroup wenARMDrawingGroup;
+        private DrawingGroup wenArmDrawingGroup;
 
         /// <summary>
         /// Drawing image that we will use to display from the Kinect
@@ -151,7 +151,11 @@ namespace WenViz
         public MainWindow()
         {
             TestParser();
+            SetupKinect();
+            SetupWENArm();
+            SetupSharedWindowProperties();
             InitializeComponent();
+            Console.WriteLine("Status of the kinnect is "+kinectStatusText);
         }
 
         private void TestParser()
@@ -176,17 +180,17 @@ namespace WenViz
         private void SetupWENArm()
         {
             // Create an image source for our arm 
-            this.wenARMDrawingGroup = new DrawingGroup();
-            this.wenArmImageSource = new DrawingImage(this.wenARMDrawingGroup);
+            this.wenArmDrawingGroup = new DrawingGroup();
+            this.wenArmImageSource = new DrawingImage(this.wenArmDrawingGroup);
 
             wenArmBones = new List<Tuple<JointType, JointType>>();
         
             // Let's reuse the right kinect arm for now..
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.ShoulderRight, JointType.ElbowRight));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.ElbowRight, JointType.WristRight));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.HandRight));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.HandRight, JointType.HandTipRight));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.ThumbRight));
+            this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.ShoulderRight, JointType.ElbowRight));
+            this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.ElbowRight, JointType.WristRight));
+            this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.HandRight));
+            this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.HandRight, JointType.HandTipRight));
+            this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.ThumbRight));
         }
 
         private void SetupKinect()
@@ -255,6 +259,8 @@ namespace WenViz
 
             // use the window object as the view model in this simple example
             this.DataContext = this;
+
+            Console.WriteLine("Loaded up Kinect");
         }
 
         private void SetupSharedWindowProperties()
@@ -273,7 +279,8 @@ namespace WenViz
             }
             else
             {
-                //TODO: come up with some defaults.
+                this.displayWidth = 512;
+                this.displayHeight = 424; 
             }
 
             // populate body colors, one for each BodyIndex
