@@ -121,7 +121,7 @@
     <value>Failed to write screenshot to {0}</value>
   </data>
   <data name="NoSensorStatusText" xml:space="preserve">
-    <value>No ready Kinect found!</value>
+    <value>Not ready. Kinect not found!</value>
   </data>
   <data name="RunningStatusText" xml:space="preserve">
     <value>Running</value>

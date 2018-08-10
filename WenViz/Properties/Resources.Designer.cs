@@ -70,7 +70,7 @@ namespace WenViz.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No ready Kinect found!.
+        ///   Looks up a localized string similar to Not ready. Kinect not found!.
         /// </summary>
         internal static string NoSensorStatusText {
             get {

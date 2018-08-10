@@ -145,24 +145,37 @@ namespace WenViz
         /// </summary>
         private string kinectStatusText = null;
 
+        //arm coordinates 
+        List<float[]> coordinates;
+
+        //WEN joints 
+        private Dictionary<JointType, Joint> wenJointsDictionary;
+
+        //Array that has joint types for the WEN arm 
+        private JointType[] wenArmJointTypes;
+
+             
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
         {
-            TestParser();
+            ParseArmCoords();
             SetupKinect();
             SetupWENArm();
             SetupSharedWindowProperties();
+            DrawWenArm(coordinates[0]);
             InitializeComponent();
+
             Console.WriteLine("Status of the kinnect is "+kinectStatusText);
         }
 
-        private void TestParser()
+        private void ParseArmCoords()
         {
             CoordinateParser parser = new CoordinateParser();
-            List<float[]> coordinates = parser.GetCoordinates("dummy_data1.txt");
+            this.coordinates = parser.GetCoordinates("dummy_data1.txt");
 
+            //Left this here for debug purposes but feel free to delete this when your done
             for (int i = 0; i < coordinates.Count; i++)
             {
                 var coords = coordinates[i];
@@ -185,21 +198,31 @@ namespace WenViz
 
             wenArmBones = new List<Tuple<JointType, JointType>>();
         
-            // Let's reuse the right kinect arm for now..
+            //IMPORTANT REDO this 
+            // Reusing the right Kinect arm for our WEN arm
             this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.ShoulderRight, JointType.ElbowRight));
             this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.ElbowRight, JointType.WristRight));
             this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.HandRight));
             this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.HandRight, JointType.HandTipRight));
-            this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.ThumbRight));
+            this.wenArmBones.Add(new Tuple<JointType, JointType>(JointType.HandTipRight, JointType.ThumbRight));
+
+            //Dictionary containing a mapping joint type and the current joint (with coordinates) for the WEN arm
+            this.wenJointsDictionary = new Dictionary<JointType, Joint>();
+
+            this.wenArmJointTypes = new[]
+            { JointType.ShoulderRight,
+              JointType.ElbowRight,
+              JointType.WristRight,
+              JointType.HandRight,
+              JointType.HandTipRight,
+              JointType.ThumbRight
+            };
         }
 
         private void SetupKinect()
         {
             // one sensor is currently supported
             this.kinectSensor = KinectSensor.GetDefault();
-
-            // get the coordinate mapper
-            this.coordinateMapper = this.kinectSensor.CoordinateMapper;
 
             // open the reader for the body frames
             this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
@@ -259,23 +282,21 @@ namespace WenViz
 
             // use the window object as the view model in this simple example
             this.DataContext = this;
-
-            Console.WriteLine("Loaded up Kinect");
         }
 
         private void SetupSharedWindowProperties()
         {
+            // get the coordinate mapper
+            this.coordinateMapper = this.kinectSensor.CoordinateMapper;
+
             if (this.kinectSensor != null)
             {
                 // get the depth (display) extents
                 FrameDescription frameDescription = this.kinectSensor.DepthFrameSource.FrameDescription;
-                Console.WriteLine("The frame description is " + frameDescription);
-
 
                 // get size of joint space
                 this.displayWidth = frameDescription.Width;
                 this.displayHeight = frameDescription.Height;
-                Console.WriteLine("Display height " + this.displayHeight + " and the Display width " + this.displayWidth);
             }
             else
             {
@@ -353,10 +374,8 @@ namespace WenViz
         /// <param name="e">event arguments</param>
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("MainWindow_Loaded called");
             if (this.bodyFrameReader != null)
             {
-                Console.WriteLine("Found the BODYREADER!");
                 this.bodyFrameReader.FrameArrived += this.Reader_FrameArrived;
             }
         }
@@ -390,18 +409,14 @@ namespace WenViz
         private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             bool dataReceived = false;
-            Console.WriteLine("Reader_FrameArrived called!");
+
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
             {
-                Console.WriteLine("We're using the bodyFrame data!");
                 if (bodyFrame != null)
                 {
-                    Console.WriteLine("BodyFrame data not null!");
                     if (this.bodies == null)
                     {
-                        Console.WriteLine("The bodies was null so we're creating bodies");
                         this.bodies = new Body[bodyFrame.BodyCount];
-                        Console.WriteLine("Bodies count is " + this.bodies.Length);
                     }
 
                     // The first time GetAndRefreshBodyData is called, Kinect will allocate each Body in the array.
@@ -409,7 +424,6 @@ namespace WenViz
                     // those body objects will be re-used.
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
                     dataReceived = true;
-                    Console.WriteLine("Data has been recieved " + dataReceived);
                 }
             }
 
@@ -468,19 +482,29 @@ namespace WenViz
         /// <param name="jointPoints">translated positions of joints to draw</param>
         /// <param name="drawingContext">drawing context to draw to</param>
         /// <param name="drawingPen">specifies color to draw a specific body</param>
-        private void DrawBody(IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext, Pen drawingPen)
+        private void DrawBody(IReadOnlyDictionary<JointType, Joint> joints, IDictionary<JointType, Point> jointPoints, DrawingContext drawingContext, Pen drawingPen, Boolean isArm = false)
         {
-            // Draw the bones
-            foreach (var bone in this.personBones)
+            if (!isArm)
             {
-                this.DrawBone(joints, jointPoints, bone.Item1, bone.Item2, drawingContext, drawingPen);
+                // Draw the person's bones
+                foreach (var bone in this.personBones)
+                {
+                    this.DrawBone(joints, jointPoints, bone.Item1, bone.Item2, drawingContext, drawingPen);
+                }
+            }
+            else
+            {
+                // Draw the wen arm's bones 
+                foreach (var bone in this.wenArmBones)
+                {
+                    this.DrawBone(joints, jointPoints, bone.Item1, bone.Item2, drawingContext, drawingPen);
+                }
             }
 
             // Draw the joints
             foreach (JointType jointType in joints.Keys)
             {
                 Brush drawBrush = null;
-
                 TrackingState trackingState = joints[jointType].TrackingState;
 
                 if (trackingState == TrackingState.Tracked)
@@ -593,6 +617,71 @@ namespace WenViz
                     Brushes.Red,
                     null,
                     new Rect(this.displayWidth - ClipBoundsThickness, 0, ClipBoundsThickness, this.displayHeight));
+            }
+        }
+
+        //DRAWS WEN arm from the passed in coordinate
+        private void DrawWenArm(float[] coordinate)
+        {
+            UpdateWenArmJointsFromCoordinate(coordinate);
+
+            using (DrawingContext dc = this.wenArmDrawingGroup.Open())
+            {
+                // Draw a transparent background to set the render size
+                dc.DrawRectangle(Brushes.Brown, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+
+                //we're going to just use a pen index of 0 for now
+                int penIndex = 0;
+                Pen drawPen = this.bodyColors[penIndex];
+
+                IReadOnlyDictionary<JointType, Joint> joints = wenJointsDictionary;
+
+                // convert the joint points to depth (display) space
+                Dictionary<JointType, Point> jointPoints = new Dictionary<JointType, Point>();
+
+                foreach (JointType jointType in joints.Keys)
+                {
+                    CameraSpacePoint position = joints[jointType].Position;
+                    Console.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
+                    DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
+                    Console.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
+                    jointPoints[jointType] = new Point(position.X, position.Y);
+                }
+
+                this.DrawBody(joints, jointPoints, dc, drawPen, true);
+
+                //Going to draw the hand of the WEN arm or the very last point 
+                //CameraSpacePoint handSpacePoint = new CameraSpacePoint();
+                //handSpacePoint.X = 0;
+                //handSpacePoint.Y = coordinate[5];
+                //handSpacePoint.Z = InferredZPositionClamp;
+
+                //DepthSpacePoint handDepthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(handSpacePoint);
+                //this.DrawHand(HandState.Closed, new Point(handDepthSpacePoint.X, handDepthSpacePoint.Y), dc);
+
+                this.personDrawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+            }
+        }
+
+        //Updates wen joints dictionary with the current coordinate 
+        private void UpdateWenArmJointsFromCoordinate(float[] coordinate)
+        {
+            //We create a list of tuples that have a mapping of a jointtype to a joint in the wen arm 
+            for (int i = 0; i < wenArmJointTypes.Length; i++)
+            {
+                JointType currentJointType = wenArmJointTypes[i];
+                Joint wenJoint = new Joint();
+
+                wenJoint.TrackingState = TrackingState.Tracked;
+                CameraSpacePoint point = new CameraSpacePoint();
+                point.X = i;
+                point.Y = 0;
+                point.Z = InferredZPositionClamp;
+
+                point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
+                wenJoint.Position = point;
+
+                wenJointsDictionary[currentJointType] = wenJoint;
             }
         }
 
