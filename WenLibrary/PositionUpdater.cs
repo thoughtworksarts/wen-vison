@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+//Something helpful for this class will be to make set constants for the startpositions and origins
+
 public class PositionUpdater
 {
     //this is the 1x6 array from the parser, one row
@@ -33,19 +35,19 @@ public class PositionUpdater
         this.origins = origins;
         this.planeTypes = planeTypes;
 
-	}  
-
-
+	}
 
     //should generate a list of positions in x,y,z coords for each joint 
 
+
+        //Right now, this method updates the endPositions array
     public float[,] nextPositionsFromOneJointMovement(int jointIndex)
     {
-        float[,] nextPositions = new float[6, 3];
-
         float[] jointPositions = new float[3];
 
         float angle = rotationAngles.GetValue(jointIndex);
+
+        float[] origin = origins.GetValue(jointIndex);
 
         float[] currentPositions = startPositions.GetValue(jointIndex); //will be an [X,Y,Z] array
 
@@ -54,21 +56,25 @@ public class PositionUpdater
         if(planeType==0) //Y,Z plane
         {
             //nextPositions = rotateByAngle(angle, assign x=y and y=z, z=x )
+            jointPositions = rotateByAngle(angle, origin.GetValue(1), origin.GetValue(2), origin.GetValue(0), currentPositions.GetValue(1), currentPositions.GetValue(2), currentPositions.GetValue(0));
         }
 
         if (planeType==1) //X,Z plane:
         {
             //assign x=x, y=z, z=y
+            jointPositions = rotateByAngle(angle, origin.GetValue(0), origin.GetValue(2), origin.GetValue(1), currentPositions.GetValue(0), currentPositions.GetValue(2), currentPositions.GetValue(1));
         }
 
         if (planeType==2) //x, y PLANE
         {
             //ASSIGN x=x. y=y, z=z
+            jointPositions = rotateByAngle(angle, origin.GetValue(0), origin.GetValue(1), origin.GetValue(2), currentPositions.GetValue(0), currentPositions.GetValue(1), currentPositions.GetValue(2));
         }
 
-        //update nextPositions, then....
+        //update endPositions
+        endPositions.SetValue(jointPositions, jointIndex);
 
-        return nextPositions;
+        return endPositions;
     }
 
     public float[] rotateByAngle(float angle, float OriginX, float OriginY, float OriginZ, float currentPointX, float currentPointY, float currentPointZ)
@@ -98,9 +104,13 @@ public class PositionUpdater
         if (planeType.GetValue(2)==0) { return 2;  } //movement happens in the (x,y) plane
     }
 
+    //This method should update endPositions for each joint's desired angle movement
+    //Will be slightly more complicated because it should do so based on startPositions = endPositions for the last update from the last joint
+    //Will also need to update the origins (the adjacent joint's new center)
     public float[,] nextPositionsFromAllJointMovement()
     {
         //TODO
+        //For the ball-in-socket joints, this method will have to update all joints that follow them to move their x coordinates
         return null;
     }
 
