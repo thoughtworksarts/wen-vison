@@ -154,6 +154,15 @@ namespace WenViz
         //Array that has joint types for the WEN arm 
         private JointType[] wenArmJointTypes;
 
+        //Starting XYZ coordinates for the 6 joints of the WEN arm
+        private double[,] startingPositions;
+
+        //Starting XYZ Origins of rotations for the 6 joints of the WEN arm
+        private double[,] origins;
+
+        //PlaneTypes array for the 6 joints of the WEN arm that tells us what plane the movement exists in
+        private int[,] planeTypes;
+
              
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -166,6 +175,9 @@ namespace WenViz
             SetupSharedWindowProperties();
             DrawWenArm(coordinates[0]);
             InitializeComponent();
+            SetUpStartingPositions();
+            //SetUpOrigins();
+            //SetUpPlaneTypes();
 
             Console.WriteLine("Status of the kinnect is "+kinectStatusText);
         }
@@ -188,6 +200,80 @@ namespace WenViz
 
                 Console.WriteLine();
             }
+        }
+
+        private void SetUpStartingPositions() 
+        {
+            double[,] startingPositions = new double[6,3];
+            //startingPositions.SetValue(5, 0,0); testing
+            int rowIndex = 0;
+            int colIndex = 0;
+            foreach (double i in new double[] {0,0,0}) {
+                startingPositions.SetValue(i, rowIndex, colIndex);
+                colIndex++;
+            }
+            rowIndex++;
+            Debug.WriteLine(startingPositions.GetValue(0,0));
+            colIndex = 0;
+            foreach (double i in new double[] {-1,0,3}) {
+                startingPositions.SetValue(i, rowIndex, colIndex);
+                colIndex++;
+            }
+            rowIndex++;
+            colIndex = 0;
+            foreach (double i in new double[] {-3,0,3}) {
+                startingPositions.SetValue(i, rowIndex, colIndex);
+                colIndex++;
+            }
+            rowIndex++;
+            colIndex = 0;
+            foreach (double i in new double[] {-4,0,3}) {
+                startingPositions.SetValue(i, rowIndex, colIndex);
+                colIndex++;
+            }
+            rowIndex++;
+            colIndex = 0;
+            foreach (double i in new double[] {-4,0,2.5}) {
+                startingPositions.SetValue(i, rowIndex, colIndex);
+                colIndex++;
+            }
+            rowIndex++;
+            colIndex = 0;
+            foreach (double i in new double[] {-4,0,2}) {
+                startingPositions.SetValue(i, rowIndex, colIndex);
+                colIndex++;
+            }
+            rowIndex++;
+            Debug.WriteLine(rowIndex);
+            Debug.WriteLine(startingPositions.GetValue(3,2));
+            this.startingPositions = startingPositions;
+
+        }
+
+        //REDO, builds but does not run (need to implement horrible loops from above)
+        private void SetUpOrigins()
+        {
+            double[,] origins = new double[6,3];
+            origins.SetValue(new double[] {0,0,0}, 0);
+            origins.SetValue(new double[] {0,0,0}, 1);
+            origins.SetValue(new double[] {-1,0,3}, 2);
+            origins.SetValue(new double[] {-3,0,3}, 3);
+            origins.SetValue(new double[] {-4,0,3}, 4);
+            origins.SetValue(new double[] {-4,0,2.5}, 5);
+            this.origins = origins;
+        }
+
+        //REDO
+        private void SetUpPlaneTypes()
+        {
+            int[,] planeTypes = new int[6,3];
+            planeTypes.SetValue(new int[] {1,1,0}, 0);
+            planeTypes.SetValue(new int[] {1,0,1}, 1);
+            planeTypes.SetValue(new int[] {1,0,1}, 2);
+            planeTypes.SetValue(new int[] {0,1,1}, 3);
+            planeTypes.SetValue(new int[] {1,0,1}, 4);
+            planeTypes.SetValue(new int[] {0,1,1}, 5);
+            this.planeTypes = planeTypes;
         }
 
         private void SetupWENArm()
@@ -621,6 +707,7 @@ namespace WenViz
         }
 
         //DRAWS WEN arm from the passed in coordinate
+        //AndyA - Going to put in sample coordinates from my starting position variable initialized above
         private void DrawWenArm(float[] coordinate)
         {
             UpdateWenArmJointsFromCoordinate(coordinate);
@@ -642,9 +729,9 @@ namespace WenViz
                 foreach (JointType jointType in joints.Keys)
                 {
                     CameraSpacePoint position = joints[jointType].Position;
-                    Console.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
+                    Debug.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
                     DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
-                    Console.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
+                    Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
                     jointPoints[jointType] = new Point(position.X, position.Y);
                 }
 
