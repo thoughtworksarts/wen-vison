@@ -22,7 +22,7 @@ public class PositionUpdater
 
     private float[,] startPositions; //maybe these should be arrays of joints who each posess their own coordinates
 
-    private float[,] endPositions;
+    private float[,] updatedPositions;
 
     private float[,] origins;
 
@@ -72,9 +72,9 @@ public class PositionUpdater
         }
 
         //update endPositions
-        endPositions.SetValue(jointPositions, jointIndex);
+        updatedPositions.SetValue(jointPositions, jointIndex);
 
-        return endPositions;
+        return updatedPositions;
     }
 
     public float[] rotateByAngle(float angle, float OriginX, float OriginY, float OriginZ, float currentPointX, float currentPointY, float currentPointZ)

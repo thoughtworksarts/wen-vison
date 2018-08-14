@@ -33,7 +33,7 @@ namespace WenViz
         /// <summary>
         /// Thickness of drawn joint lines
         /// </summary>
-        private const double JointThickness = 3;
+        private const double JointThickness = 10;
 
         /// <summary>
         /// Thickness of clip edge rectangles
@@ -208,38 +208,38 @@ namespace WenViz
             //startingPositions.SetValue(5, 0,0); testing
             int rowIndex = 0;
             int colIndex = 0;
-            foreach (double i in new double[] {0,0,0}) {
+            foreach (double i in new double[] {1000,1000,1000}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             Debug.WriteLine(startingPositions.GetValue(0,0));
             colIndex = 0;
-            foreach (double i in new double[] {1000-100,500+0,300}) {
+            foreach (double i in new double[] {1000-100,-1000+0,300}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             colIndex = 0;
-            foreach (double i in new double[] {1000-300,500+0,300}) {
+            foreach (double i in new double[] {1000-300,-1000+0,300}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             colIndex = 0;
-            foreach (double i in new double[] {1000-400,500+0,300}) {
+            foreach (double i in new double[] {1000-400,-1000+0,300}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             colIndex = 0;
-            foreach (double i in new double[] {1000-400,500+0,250}) {
+            foreach (double i in new double[] {1000-400,-1000+0,250}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             colIndex = 0;
-            foreach (double i in new double[] {1000-400,500+0,200}) {
+            foreach (double i in new double[] {1000-400,-1000+0,200}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
@@ -254,7 +254,7 @@ namespace WenViz
         private void SetUpOrigins()
         {
             double[,] origins = new double[6,3];
-            origins.SetValue(new double[] {0,0,0}, 0);
+            origins.SetValue(new double[] {0.1,0.1,0.1}, 0);
             origins.SetValue(new double[] {0,0,0}, 1);
             origins.SetValue(new double[] {-1,0,3}, 2);
             origins.SetValue(new double[] {-3,0,3}, 3);
@@ -374,6 +374,7 @@ namespace WenViz
         {
             // get the coordinate mapper
             this.coordinateMapper = this.kinectSensor.CoordinateMapper;
+            //this.coordinateMapper = new CoordinateMapper();
 
             if (this.kinectSensor != null)
             {
@@ -386,8 +387,8 @@ namespace WenViz
             }
             else
             {
-                this.displayWidth = 512;
-                this.displayHeight = 424; 
+                this.displayWidth = 5120;
+                this.displayHeight = 4240; 
             }
 
             // populate body colors, one for each BodyIndex
@@ -605,6 +606,7 @@ namespace WenViz
                 if (drawBrush != null)
                 {
                     drawingContext.DrawEllipse(drawBrush, null, jointPoints[jointType], JointThickness, JointThickness);
+                    //Debug.WriteLine("We are drawing the joint "+jointType+" on the screen at "+jointPoints[jointType].X+" and "+jointPoints[jointType].Y);
                 }
             }
         }
@@ -716,7 +718,7 @@ namespace WenViz
             using (DrawingContext dc = this.wenArmDrawingGroup.Open())
             {
                 // Draw a transparent background to set the render size
-                dc.DrawRectangle(Brushes.Brown, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                //dc.DrawRectangle(Brushes.Brown, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
                 //we're going to just use a pen index of 0 for now
                 int penIndex = 0;
@@ -733,7 +735,7 @@ namespace WenViz
                     Debug.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
                     DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
                     Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
-                    jointPoints[jointType] = new Point(position.X, position.Y);
+                    jointPoints[jointType] = new Point(depthSpacePoint.X/7336, depthSpacePoint.Y/7336);
                 }
 
                 this.DrawBody(joints, jointPoints, dc, drawPen, true);
@@ -759,13 +761,14 @@ namespace WenViz
             for (int i = 0; i < wenArmJointTypes.Length; i++)
             {
                 Joint wenJoint = new Joint();
+                Debug.WriteLine("Index is "+i);
                 var currentJointType = wenArmJointTypes[i];
             
                 wenJoint.TrackingState = TrackingState.Tracked;
                 CameraSpacePoint point = new CameraSpacePoint();
-                point.X = (float) startingPositions[i,0];
-                point.Y = (float) startingPositions[i,1];
-                point.Z = (float) startingPositions[i,2];
+                point.X = (float) startingPositions[i,0]/1001;
+                point.Y = (float) startingPositions[i,1]/1001;
+                point.Z = (float) startingPositions[i,2]/1001;
 
                 //point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
                 wenJoint.Position = point;
