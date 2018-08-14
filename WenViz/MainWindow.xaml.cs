@@ -173,9 +173,9 @@ namespace WenViz
             SetupKinect();
             SetupWENArm();
             SetupSharedWindowProperties();
-            DrawWenArm(coordinates[0]);
-            InitializeComponent();
             SetUpStartingPositions();
+            DrawWenArm();
+            InitializeComponent();
             //SetUpOrigins();
             //SetUpPlaneTypes();
 
@@ -215,31 +215,31 @@ namespace WenViz
             rowIndex++;
             Debug.WriteLine(startingPositions.GetValue(0,0));
             colIndex = 0;
-            foreach (double i in new double[] {-1,0,3}) {
+            foreach (double i in new double[] {1000-100,500+0,300}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             colIndex = 0;
-            foreach (double i in new double[] {-3,0,3}) {
+            foreach (double i in new double[] {1000-300,500+0,300}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             colIndex = 0;
-            foreach (double i in new double[] {-4,0,3}) {
+            foreach (double i in new double[] {1000-400,500+0,300}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             colIndex = 0;
-            foreach (double i in new double[] {-4,0,2.5}) {
+            foreach (double i in new double[] {1000-400,500+0,250}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
             rowIndex++;
             colIndex = 0;
-            foreach (double i in new double[] {-4,0,2}) {
+            foreach (double i in new double[] {1000-400,500+0,200}) {
                 startingPositions.SetValue(i, rowIndex, colIndex);
                 colIndex++;
             }
@@ -708,9 +708,10 @@ namespace WenViz
 
         //DRAWS WEN arm from the passed in coordinate
         //AndyA - Going to put in sample coordinates from my starting position variable initialized above
-        private void DrawWenArm(float[] coordinate)
+        //AndyA - Need to add the startPositions as the XYZ Position attribute for each joint... how to do this? 
+        private void DrawWenArm()
         {
-            UpdateWenArmJointsFromCoordinate(coordinate);
+            UpdateWenArmJointsFromCoordinate();
 
             using (DrawingContext dc = this.wenArmDrawingGroup.Open())
             {
@@ -751,21 +752,22 @@ namespace WenViz
         }
 
         //Updates wen joints dictionary with the current coordinate 
-        private void UpdateWenArmJointsFromCoordinate(float[] coordinate)
+        private void UpdateWenArmJointsFromCoordinate()
         {
+            
             //We create a list of tuples that have a mapping of a jointtype to a joint in the wen arm 
             for (int i = 0; i < wenArmJointTypes.Length; i++)
             {
-                JointType currentJointType = wenArmJointTypes[i];
                 Joint wenJoint = new Joint();
-
+                var currentJointType = wenArmJointTypes[i];
+            
                 wenJoint.TrackingState = TrackingState.Tracked;
                 CameraSpacePoint point = new CameraSpacePoint();
-                point.X = i;
-                point.Y = 0;
-                point.Z = InferredZPositionClamp;
+                point.X = (float) startingPositions[i,0];
+                point.Y = (float) startingPositions[i,1];
+                point.Z = (float) startingPositions[i,2];
 
-                point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
+                //point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
                 wenJoint.Position = point;
 
                 wenJointsDictionary[currentJointType] = wenJoint;
