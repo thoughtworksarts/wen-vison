@@ -174,6 +174,8 @@ namespace WenViz
         //caches the distance between adjacent joints
         private List<double> relativeJointDistances; 
 
+        private DateTime lastTimeStamp;
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -338,6 +340,8 @@ namespace WenViz
            // use the window object as the view model in this simple example
             this.DataContext = this;
 
+            this.lastTimeStamp = DateTime.Now;
+
             // get the coordinate mapper
             this.coordinateMapper = this.kinectSensor.CoordinateMapper;
             //this.coordinateMapper = new CoordinateMapper();
@@ -465,8 +469,10 @@ namespace WenViz
         private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             Debug.Write("reader frame arrived being called");
-
-            DrawRepeatingWenArm();
+            if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .25) {
+                DrawRepeatingWenArm();
+                lastTimeStamp = DateTime.Now;
+            }
             bool dataReceived = false;
 
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
@@ -712,7 +718,6 @@ namespace WenViz
                     CameraSpacePoint position = joints[jointType].Position;
                     Debug.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
                     DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
-                    Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
                     if(depthSpacePoint.X == Single.PositiveInfinity || depthSpacePoint.X == Single.NegativeInfinity)
                     {
                         Debug.WriteLine("We have pos infinity for x point ");
@@ -722,9 +727,11 @@ namespace WenViz
                     if(depthSpacePoint.Y == Single.PositiveInfinity || depthSpacePoint.Y == Single.NegativeInfinity)
                     {
                         Debug.WriteLine("We have pos infinity for x point ");
-                        depthSpacePoint.X = 100; 
+                        depthSpacePoint.Y = 100; 
                     } 
                     jointPoints[jointType] = new Point(depthSpacePoint.X/836, depthSpacePoint.Y/836);
+                    Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
+
                 }
 
                 this.DrawBody(joints, jointPoints, dc, drawPen, true);
