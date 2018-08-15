@@ -158,7 +158,7 @@ namespace WenViz
         private double[,] startingPositions;
 
         //Starting XYZ Origins of rotations for the 6 joints of the WEN arm
-        private double[,] origins;
+        private double[,] STARTING_ORIGINS;
 
         //PlaneTypes array for the 6 joints of the WEN arm that tells us what plane the movement exists in
         private int[,] planeTypes;
@@ -181,8 +181,9 @@ namespace WenViz
             SetUpOrigins();
             SetUpPlaneTypes();
             SetupWenArmUpdater();
+            SetUpPositionUpdater();
             DrawWenArm();
-              InitializeComponent(); 
+            InitializeComponent(); 
             //DrawRepeatingWenArm();
 
             Console.WriteLine("Status of the kinnect is "+kinectStatusText);
@@ -224,7 +225,7 @@ namespace WenViz
         //REDO, builds but does not run (need to implement horrible loops from above)
         private void SetUpOrigins()
         {
-           this.origins = new double[,]
+           this.STARTING_ORIGINS = new double[,]
             {
                 {0, 0, 0},
                 {0, 0, 0},
@@ -741,9 +742,15 @@ namespace WenViz
 
         private void CreateNewPositionForOneJoint(int jointIndex, int i) {
             //a dummy class to add a second point to the arm 
+            //Reality: Take the next set of rotation angle/ single angle, and generate the next points
+            //If it's the end of the script, start again
+
+            //call nextPositionFromOneJointMovement
                     
-                               this.startingPositions = new double[,]
+                               this.currentPositions = new double[,]
                                 {
+                                    //this should actually set updatedPositions
+                                    //set currentPositions = updatedPositions
                                     {10, 10+i,1000},
                                     {10,-1000+0+i,300},
                                     {1000-300+10+i,-1000+0,300},
@@ -776,9 +783,9 @@ namespace WenViz
             
                 wenJoint.TrackingState = TrackingState.Tracked;
                 CameraSpacePoint point = new CameraSpacePoint();
-                point.X = (float) startingPositions[i,0]/1001;
-                point.Y = (float) startingPositions[i,1]/1001;
-                point.Z = (float) startingPositions[i,2]/1001;
+                point.X = (float) currentPositions[i,0]/1001;
+                point.Y = (float) currentPositions[i,1]/1001;
+                point.Z = (float) currentPositions[i,2]/1001;
 
                 //point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
                 wenJoint.Position = point;
@@ -803,9 +810,29 @@ namespace WenViz
         // ______________ ------------------- _________________ ------------------------ ___________________ ----------------------
 
 
+        //come from the coordinate parser class, maybe populate this in the parseArmCoords method?
+        private float[] rotationAngles;
 
+        private double[,] currentPositions; //maybe these should be arrays of joints who each posess their own coordinates
 
+        private double[,] updatedPositions;
 
+        private double[,] updatedOrigins;
+
+        private double[,] currentOrigins;
+
+        //private float[,] origins;
+        //planeTypes from above 
+
+        public void SetUpPositionUpdater() {
+            //this.rotationAngles = return from parseArmCoords
+            //set up updated positions and current positions 
+            //set up an updated origins ds
+            //set up current origins ds
+            this.currentPositions = startingPositions;
+            this.currentOrigins = STARTING_ORIGINS;
+
+        }
 
 
 
