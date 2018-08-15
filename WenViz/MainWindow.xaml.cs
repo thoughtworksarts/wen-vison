@@ -165,12 +165,15 @@ namespace WenViz
 
         //private PositionUpdater positionUpdater; 
 
+         public int repeatIndex;
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
         {
             ParseArmCoords();
+            repeatIndex=1;
             SetupKinect();
             SetupWENArm();
             SetupSharedWindowProperties();
@@ -179,7 +182,8 @@ namespace WenViz
             SetUpPlaneTypes();
             SetupWenArmUpdater();
             DrawWenArm();
-            InitializeComponent();
+              InitializeComponent(); 
+            //DrawRepeatingWenArm();
 
             Console.WriteLine("Status of the kinnect is "+kinectStatusText);
         }
@@ -334,13 +338,13 @@ namespace WenViz
 
             // Create an image source that we can use in our image control
             this.personImageSource = new DrawingImage(this.personDrawingGroup);
-
-            // use the window object as the view model in this simple example
-            this.DataContext = this;
         }
 
         private void SetupSharedWindowProperties()
         {
+           // use the window object as the view model in this simple example
+            this.DataContext = this;
+
             // get the coordinate mapper
             this.coordinateMapper = this.kinectSensor.CoordinateMapper;
             //this.coordinateMapper = new CoordinateMapper();
@@ -369,6 +373,8 @@ namespace WenViz
             this.bodyColors.Add(new Pen(Brushes.Blue, 6));
             this.bodyColors.Add(new Pen(Brushes.Indigo, 6));
             this.bodyColors.Add(new Pen(Brushes.Violet, 6));
+
+
         }
 
         /// <summary>
@@ -433,6 +439,7 @@ namespace WenViz
             if (this.bodyFrameReader != null)
             {
                 this.bodyFrameReader.FrameArrived += this.Reader_FrameArrived;
+                Debug.Write("main window loaded");
             }
         }
 
@@ -464,6 +471,10 @@ namespace WenViz
         /// <param name="e">event arguments</param>
         private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
+            Debug.Write("reader frame arrived being called");
+
+            DrawRepeatingWenArm(repeatIndex);
+            repeatIndex++;
             bool dataReceived = false;
 
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
@@ -519,6 +530,7 @@ namespace WenViz
                             }
 
                             this.DrawBody(joints, jointPoints, dc, drawPen);
+                            Debug.Write("drawing person");
 
                             this.DrawHand(body.HandLeftState, jointPoints[JointType.HandLeft], dc);
                             this.DrawHand(body.HandRightState, jointPoints[JointType.HandRight], dc);
@@ -723,8 +735,32 @@ namespace WenViz
                 //DepthSpacePoint handDepthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(handSpacePoint);
                 //this.DrawHand(HandState.Closed, new Point(handDepthSpacePoint.X, handDepthSpacePoint.Y), dc);
 
-                this.personDrawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                this.wenArmDrawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
             }
+        }
+
+        private void CreateNewPositionForOneJoint(int jointIndex, int i) {
+            //a dummy class to add a second point to the arm 
+                    
+                               this.startingPositions = new double[,]
+                                {
+                                    {10, 10+i,1000},
+                                    {10,-1000+0+i,300},
+                                    {1000-300+10+i,-1000+0,300},
+                                    {40,-1000+0+10+i,300},
+                                    {10+10+i,-1000+0+10,250},
+                                    {1000-400+i,-1000+0+10,200}
+                                };
+        }
+
+        private void DrawRepeatingWenArm(int repeatingIndex) {
+                DrawWenArm();
+                //InitializeComponent();
+                //System.Threading.Thread.Sleep(700);
+                CreateNewPositionForOneJoint(3, repeatingIndex);
+                //System.Threading.Thread.Sleep(700);
+                Debug.WriteLine(this.startingPositions[1,0]);
+
         }
 
         //Updates wen joints dictionary with the current coordinate 
@@ -762,5 +798,18 @@ namespace WenViz
             this.KinectStatusText = this.kinectSensor.IsAvailable ? Properties.Resources.RunningStatusText
                                                             : Properties.Resources.SensorNotAvailableStatusText;
         }
+
+        //* ________________________________________ POSITION UPDATER METHODS BELOW ______________________________________________ */
+        // ______________ ------------------- _________________ ------------------------ ___________________ ----------------------
+
+
+
+
+
+
+
+
+
+
     }
 }
