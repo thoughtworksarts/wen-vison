@@ -146,7 +146,7 @@ namespace WenViz
         private string kinectStatusText = null;
 
         //arm coordinates 
-        List<float[]> coordinates;
+        List<float[]> armRotationAngles;
 
         //WEN joints 
         private Dictionary<JointType, Joint> wenJointsDictionary;
@@ -155,25 +155,28 @@ namespace WenViz
         private JointType[] wenArmJointTypes;
 
         //Starting XYZ coordinates for the 6 joints of the WEN arm
-        private double[,] startingPositions;
+        private double[][] startingPositions;
 
         //Starting XYZ Origins of rotations for the 6 joints of the WEN arm
-        private double[,] STARTING_ORIGINS;
+        private double[][] STARTING_ORIGINS;
 
         //PlaneTypes array for the 6 joints of the WEN arm that tells us what plane the movement exists in
-        private int[,] planeTypes;
+        private int[][] planeTypes;
 
         //private PositionUpdater positionUpdater; 
 
-         public int repeatIndex;
+         public int numberOfMoves;
+
+         public int currentRowOfAngles; 
+
+         public int currentJointToMove;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public MainWindow()
         {
-            ParseArmCoords();
-            repeatIndex=1;
+            ParseRotationAnglesForMovement();
             SetupKinect();
             SetupWENArm();
             SetupSharedWindowProperties();
@@ -184,68 +187,53 @@ namespace WenViz
             SetUpPositionUpdater();
             DrawWenArm();
             InitializeComponent(); 
-            //DrawRepeatingWenArm();
 
             Console.WriteLine("Status of the kinnect is "+kinectStatusText);
         }
 
-        private void ParseArmCoords()
+        private void ParseRotationAnglesForMovement()
         {
             CoordinateParser parser = new CoordinateParser();
-            this.coordinates = parser.GetCoordinates("dummy_data1.txt");
-
-            //Left this here for debug purposes but feel free to delete this when your done
-            for (int i = 0; i < coordinates.Count; i++)
-            {
-                var coords = coordinates[i];
-
-                Console.WriteLine("Current set of coordinates: ");
-                for (int j = 0; j < coords.Length; j++)
-                {
-                    Console.WriteLine(j + ". " + coords[j]);
-                }
-
-                Console.WriteLine();
-            }
+            this.armRotationAngles = parser.GetCoordinates("dummy_data1.txt");
         }
 
         private void SetUpStartingPositions()
         {
-           this.startingPositions = new double[,]
+           this.startingPositions = new double[][]
             {
-                {1000,1000,1000},
-                {1000-100,-1000+0,300},
-                {1000-300,-1000+0,300},
-                {1000-400,-1000+0,300},
-                {1000-400,-1000+0,250},
-                {1000-400,-1000+0,200}
+                new double[] {1000,1000,1000},
+                new double[] {1000-100,-1000+0,300},
+                new double[] {1000-300,-1000+0,300},
+                new double[] {1000-400,-1000+0,300},
+                new double[] {1000-400,-1000+0,250},
+                new double[] {1000-400,-1000+0,200}
             };
         }
 
         //REDO, builds but does not run (need to implement horrible loops from above)
         private void SetUpOrigins()
         {
-           this.STARTING_ORIGINS = new double[,]
+           this.STARTING_ORIGINS = new double[][]
             {
-                {0, 0, 0},
-                {0, 0, 0},
-                {-1, 0, 2},
-                {-3, 0, 3},
-                {-4, 0, 3},
-                {-4, 0, 2.5}
+                new double[] {0, 0, 0},
+                new double[] {0, 0, 0},
+                new double[] {-1, 0, 2},
+                new double[] {-3, 0, 3},
+                new double[] {-4, 0, 3},
+                new double[] {-4, 0, 2.5}
             };
         }
 
         //REDO
         private void SetUpPlaneTypes()
         {
-            this.planeTypes = new int[,] {
-            {1,1,0},
-            {1,0,1},
-            {1,0,1},
-            {0,1,1},
-            {1,0,1},
-            {0,1,1},
+            this.planeTypes = new int[][] {
+            new int[] {1,1,0},
+            new int[] {1,0,1},
+            new int[] {1,0,1},
+            new int[] {0,1,1},
+            new int[] {1,0,1},
+            new int[] {0,1,1},
             };
 
         }
@@ -474,8 +462,7 @@ namespace WenViz
         {
             Debug.Write("reader frame arrived being called");
 
-            DrawRepeatingWenArm(repeatIndex);
-            repeatIndex++;
+            DrawRepeatingWenArm();
             bool dataReceived = false;
 
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
@@ -740,33 +727,22 @@ namespace WenViz
             }
         }
 
-        private void CreateNewPositionForOneJoint(int jointIndex, int i) {
-            //a dummy class to add a second point to the arm 
-            //Reality: Take the next set of rotation angle/ single angle, and generate the next points
-            //If it's the end of the script, start again
 
-            //call nextPositionFromOneJointMovement
-                    
-                               this.currentPositions = new double[,]
-                                {
-                                    //this should actually set updatedPositions
-                                    //set currentPositions = updatedPositions
-                                    {10, 10+i,1000},
-                                    {10,-1000+0+i,300},
-                                    {1000-300+10+i,-1000+0,300},
-                                    {40,-1000+0+10+i,300},
-                                    {10+10+i,-1000+0+10,250},
-                                    {1000-400+i,-1000+0+10,200}
-                                };
-        }
-
-        private void DrawRepeatingWenArm(int repeatingIndex) {
+        private void DrawRepeatingWenArm() {
                 DrawWenArm();
-                //InitializeComponent();
-                //System.Threading.Thread.Sleep(700);
-                CreateNewPositionForOneJoint(3, repeatingIndex);
-                //System.Threading.Thread.Sleep(700);
-                Debug.WriteLine(this.startingPositions[1,0]);
+                if(currentRowOfAngles >= armRotationAngles.Count) 
+                {
+                    numberOfMoves = 0;
+                    currentRowOfAngles = 0;
+                    currentJointToMove = 0;
+                }
+
+                float angle = this.armRotationAngles[currentRowOfAngles][currentJointToMove];
+                updateCurrentPositionsFromOneJointMovement(angle);
+                this.numberOfMoves++;
+                this.currentRowOfAngles = (int) Math.Floor((decimal) numberOfMoves/6);
+                this.currentJointToMove = numberOfMoves % 6;
+                
 
         }
 
@@ -783,9 +759,9 @@ namespace WenViz
             
                 wenJoint.TrackingState = TrackingState.Tracked;
                 CameraSpacePoint point = new CameraSpacePoint();
-                point.X = (float) currentPositions[i,0]/1001;
-                point.Y = (float) currentPositions[i,1]/1001;
-                point.Z = (float) currentPositions[i,2]/1001;
+                point.X = (float) currentPositions[i][0]/1001;
+                point.Y = (float) currentPositions[i][1]/1001;
+                point.Z = (float) currentPositions[i][2]/1001;
 
                 //point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
                 wenJoint.Position = point;
@@ -813,25 +789,125 @@ namespace WenViz
         //come from the coordinate parser class, maybe populate this in the parseArmCoords method?
         private float[] rotationAngles;
 
-        private double[,] currentPositions; //maybe these should be arrays of joints who each posess their own coordinates
+        private double[][] currentPositions; //maybe these should be arrays of joints who each posess their own coordinates
 
-        private double[,] updatedPositions;
+        private double[][] updatedPositions;
 
-        private double[,] updatedOrigins;
+        private double[][] updatedOrigins;
 
-        private double[,] currentOrigins;
+        private double[][] currentOrigins;
 
         //private float[,] origins;
         //planeTypes from above 
 
         public void SetUpPositionUpdater() {
-            //this.rotationAngles = return from parseArmCoords
+            
             //set up updated positions and current positions 
             //set up an updated origins ds
             //set up current origins ds
             this.currentPositions = startingPositions;
             this.currentOrigins = STARTING_ORIGINS;
+            this.currentRowOfAngles = 0;
+            this.currentJointToMove = 0;
+            this.numberOfMoves = 0;
 
+        }
+
+        public void updateCurrentPositionsFromOneJointMovement(float angle)
+        {
+            //Reality: Take the next set of rotation angle/ single angle, and generate the next points
+            //If it's the end of the script, start again
+
+            //call nextPositionFromOneJointMovement
+            Random random = new Random();
+
+            //this.updatedPositions = 
+                    
+                               this.currentPositions = new double[][]
+                                {
+                                    //this should actually set updatedPositions
+                                    //set currentPositions = updatedPositions
+                                    new double[] {10, 10 + (float) random.Next(1,100),1000},
+                                    new double[] {10,-1000+0+ (float) random.Next(1,100),300},
+                                    new double[] {1000-300+10+ (float) random.Next(1,100),-1000+0,300},
+                                    new double[] {40,-1000+0+10+(float) (random.Next(1,100)),300},
+                                    new double[] {10+10+(float) random.Next(1,100),-1000+0+10,250},
+                                    new double[] {1000-400+(float) random.Next(1,100),-1000+0+10,200}
+                                };
+
+            double[] origin = currentOrigins[currentJointToMove];
+
+            //grabbing array of current x, y, z positions from current positions array -- which contains all positions
+            double[] currentJointXYZPositions = this.currentPositions[currentJointToMove]; //will be an [X,Y,Z] array
+
+            //grabbing the plane that the current joint moves in (I.e. X-Y, X-Z)
+            int planeType = determineRotationAxis(planeTypes[currentJointToMove]);
+
+            //assign X, Y, and Z according to the planeType,, where X and Y become the relevent axes in the plane (could be X and Z) and Z is assigned to the rotation axis
+            double[] updatedPositions = new double[3];
+            if (planeType == 0) //Y,Z plane
+            {
+                //nextPositions = rotateByAngle(angle, assign x=y and y=z, z=x )
+                updatedPositions = rotateByAngle(angle, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
+                
+}
+
+            if (planeType == 1) //X,Z plane:
+            {
+                //assign x=x, y=z, z=y
+                updatedPositions = rotateByAngle(angle, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
+            }
+
+            if (planeType == 2) //x, y PLANE
+            {
+                //ASSIGN x=x. y=y, z=z
+                updatedPositions = rotateByAngle(angle, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
+            }
+
+            for (int i=0; i<3; i++) {
+                currentPositions[currentJointToMove][i] = updatedPositions[i];
+            }
+
+
+            //update endPositions
+            //update origins
+            //updatedPositions[jointIndex, 0] = jointPositions.GetValue(0);
+            //updatedPositions[jointIndex, 1] = jointPositions.GetValue(1);
+            //updatedPositions[jointIndex, 2] = jointPositions.GetValue(2);
+            //updatedPositions.SetValue(jointPositions, jointIndex);
+            //set startPositions = updatedPositions
+            //set origins = updatedOrigins
+
+        }
+
+        public int determineRotationAxis(int[] planeType)
+        {
+            //returns the index of the axis that the rotation occurs around, the 1's mean movement is visible in that plane
+            if (planeType[0] == 0) { return 0; } //movement happens in the (y,z) plane
+            if (planeType[1] == 0) { return 1; } //movement happens in the (x,z) plane
+            if (planeType[2] == 0) { return 2; } //movement happens in the (x,y) plane
+            else return 0; 
+        }
+
+                
+
+        public double[] rotateByAngle(float angle, double OriginX, double OriginY, double OriginZ, double currentPointX, double currentPointY, double currentPointZ)
+        {
+            double[] updatedPointCoordinates = new double[3];
+
+            double nextPointX;
+            double nextPointY;
+            double nextPointZ;
+
+            nextPointX = OriginX + Math.Cos(angle) * (currentPointX - OriginX) - Math.Sin(angle) * (currentPointY - OriginY);
+            nextPointY = OriginY + Math.Sin(angle) * (currentPointX - OriginX) - Math.Cos(angle) * (currentPointY - OriginY);
+            nextPointZ = currentPointZ;
+
+            updatedPointCoordinates.SetValue(nextPointX, 0);
+            updatedPointCoordinates.SetValue(nextPointY, 1);
+            updatedPointCoordinates.SetValue(nextPointZ, 2);
+
+            return updatedPointCoordinates;
         }
 
 
