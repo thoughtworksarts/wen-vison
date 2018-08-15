@@ -201,12 +201,12 @@ namespace WenViz
         {
            this.startingPositions = new double[][]
             {
-                new double[] {1000,1000,1000},
-                new double[] {1000-100,-1000+0,300},
-                new double[] {1000-300,-1000+0,300},
-                new double[] {1000-400,-1000+0,300},
-                new double[] {1000-400,-1000+0,250},
-                new double[] {1000-400,-1000+0,200}
+                new double[] {-0.2831486, 0.2687793, 1.042485},
+                new double[] {-0.5486, 0.2687793, 1.042485},
+                new double[] {-0.7831486, 0.2687793, 1.042485},
+                new double[] {-0.9831486, 0.3687793, 1.142485},
+                new double[] {-0.2831486, 0.4687793, 1.042485},
+                new double[] {-0.2831486, 0.6687793, 1.542485}
             };
         }
 
@@ -217,10 +217,10 @@ namespace WenViz
             {
                 new double[] {0, 0, 0},
                 new double[] {0, 0, 0},
-                new double[] {-1, 0, 2},
-                new double[] {-3, 0, 3},
-                new double[] {-4, 0, 3},
-                new double[] {-4, 0, 2.5}
+                new double[] {-0.5486, 0.2687793, 1.042485},
+                new double[] {-0.7831486, 0.2687793, 1.042485},
+                new double[] {-0.9831486, 0.3687793, 1.142485},
+                new double[] {-0.2831486, 0.4687793, 1.042485}
             };
         }
 
@@ -709,7 +709,18 @@ namespace WenViz
                     Debug.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
                     DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
                     Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
-                    jointPoints[jointType] = new Point(depthSpacePoint.X/7336, depthSpacePoint.Y/7336);
+                    if(depthSpacePoint.X == Single.PositiveInfinity || depthSpacePoint.X == Single.NegativeInfinity)
+                    {
+                        Debug.WriteLine("We have pos infinity for x point ");
+                        depthSpacePoint.X = 100; 
+                    } 
+
+                    if(depthSpacePoint.Y == Single.PositiveInfinity || depthSpacePoint.Y == Single.NegativeInfinity)
+                    {
+                        Debug.WriteLine("We have pos infinity for x point ");
+                        depthSpacePoint.X = 100; 
+                    } 
+                    jointPoints[jointType] = new Point(depthSpacePoint.X/836, depthSpacePoint.Y/836);
                 }
 
                 this.DrawBody(joints, jointPoints, dc, drawPen, true);
@@ -759,9 +770,9 @@ namespace WenViz
             
                 wenJoint.TrackingState = TrackingState.Tracked;
                 CameraSpacePoint point = new CameraSpacePoint();
-                point.X = (float) currentPositions[i][0]/1001;
-                point.Y = (float) currentPositions[i][1]/1001;
-                point.Z = (float) currentPositions[i][2]/1001;
+                point.X = (float) currentPositions[i][0]/50 % displayWidth;
+                point.Y = (float) currentPositions[i][1]/50 % displayWidth;
+                point.Z = (float) currentPositions[i][2]/50 % displayWidth;
 
                 //point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
                 wenJoint.Position = point;
@@ -869,14 +880,12 @@ namespace WenViz
             }
 
 
-            //update endPositions
             //update origins
-            //updatedPositions[jointIndex, 0] = jointPositions.GetValue(0);
-            //updatedPositions[jointIndex, 1] = jointPositions.GetValue(1);
-            //updatedPositions[jointIndex, 2] = jointPositions.GetValue(2);
-            //updatedPositions.SetValue(jointPositions, jointIndex);
-            //set startPositions = updatedPositions
-            //set origins = updatedOrigins
+              //set origins = updatedOrigins
+
+            for (int jointNumber = 2; jointNumber<6; jointNumber++) {
+                currentOrigins[jointNumber] = currentPositions[jointNumber-1];
+            }
 
         }
 
