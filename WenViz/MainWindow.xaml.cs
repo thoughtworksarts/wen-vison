@@ -171,6 +171,9 @@ namespace WenViz
 
          public int currentJointToMove;
 
+        //caches the distance between adjacent joints
+        private List<double> relativeJointDistances; 
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -183,6 +186,7 @@ namespace WenViz
             SetUpStartingPositions();
             SetUpOrigins();
             SetUpPlaneTypes();
+            CacheJointDistances();
             SetupWenArmUpdater();
             SetUpPositionUpdater();
             DrawWenArm();
@@ -220,7 +224,7 @@ namespace WenViz
                 new double[] {-0.5486, 0.2687793, 1.042485},
                 new double[] {-0.7831486, 0.2687793, 1.042485},
                 new double[] {-0.9831486, 0.3687793, 1.142485},
-                new double[] {-0.2831486, 0.4687793, 1.042485}
+                new double[] {-0.2831486, 0.4687793, 1.042485} 
             };
         }
 
@@ -770,9 +774,9 @@ namespace WenViz
             
                 wenJoint.TrackingState = TrackingState.Tracked;
                 CameraSpacePoint point = new CameraSpacePoint();
-                point.X = (float) currentPositions[i][0]/50 % displayWidth;
-                point.Y = (float) currentPositions[i][1]/50 % displayWidth;
-                point.Z = (float) currentPositions[i][2]/50 % displayWidth;
+                point.X = (float) currentPositions[i][0]*50 % displayWidth;
+                point.Y = (float) currentPositions[i][1]*50 % displayWidth;
+                point.Z = (float) currentPositions[i][2]*50 % displayWidth;
 
                 //point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
                 wenJoint.Position = point;
@@ -879,9 +883,12 @@ namespace WenViz
                 currentPositions[currentJointToMove][i] = updatedPositions[i];
             }
 
+            //updateadjacentPoints loop
+            for (int joint=currentJointToMove; joint<5; joint++) {
+                updateAdjacentJoint(joint, joint+1);
+            }
 
             //update origins
-              //set origins = updatedOrigins
 
             for (int jointNumber = 2; jointNumber<6; jointNumber++) {
                 currentOrigins[jointNumber] = currentPositions[jointNumber-1];
@@ -917,6 +924,56 @@ namespace WenViz
             updatedPointCoordinates.SetValue(nextPointZ, 2);
 
             return updatedPointCoordinates;
+        }
+
+        public void updateAdjacentJoint(int currentJoint, int adjacentJoint) {
+            double[] currentJointPosition = this.currentPositions[currentJoint];
+            double[] adjacentJointPosition = this.currentPositions[adjacentJoint];
+            //edit that ^^, reassign
+
+            double relativeDistance = this.relativeJointDistances[currentJoint];
+            double vX = currentJointPosition[0] - adjacentJointPosition[0];
+            double vY = currentJointPosition[1] - adjacentJointPosition[1];
+            double vZ = currentJointPosition[2] - adjacentJointPosition[2];
+
+            double vDistance = Math.Sqrt(Math.Pow(vX, 2) + Math.Pow(vY, 2) + Math.Pow(vZ, 2));
+
+            double newAdjacentPositionX = (adjacentJointPosition[0] + vX) / (vDistance * relativeDistance);
+            double newAdjacentPositionY = (adjacentJointPosition[1] + vY) / (vDistance * relativeDistance);
+            double newAdjacentPositionZ = (adjacentJointPosition[2] + vZ) / (vDistance * relativeDistance);
+
+            currentPositions[adjacentJoint][0] = newAdjacentPositionX;
+            currentPositions[adjacentJoint][1] = newAdjacentPositionY;
+            currentPositions[adjacentJoint][2] = newAdjacentPositionZ;
+
+
+
+        }
+
+        public void CacheJointDistances() 
+        {
+            this.relativeJointDistances = new List<double>();
+            for(int jointNumber = 1; jointNumber < 6; jointNumber++) 
+            {
+                var relativeJointDistance = CalculateDistance(jointNumber, jointNumber - 1);
+                relativeJointDistances.Add(relativeJointDistance);
+            }
+        }
+
+        private double CalculateDistance(int a, int b)  
+        {
+            double aX = this.startingPositions[a][0];
+            double aY = this.startingPositions[a][1];
+            double aZ = this.startingPositions[a][2];
+            double bX = this.startingPositions[b][0];
+            double bY = this.startingPositions[b][1];
+            double bZ = this.startingPositions[b][2];
+
+            var radical = Math.Pow(bX - aX, 2)
+                + Math.Pow(bY - aY, 2) 
+                + Math.Pow(bZ - aZ, 2); 
+
+            return Math.Sqrt(radical);
         }
 
 
