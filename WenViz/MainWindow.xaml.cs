@@ -843,7 +843,7 @@ namespace WenViz
 
         }
 
-        public void updateCurrentPositionsFromOneJointMovement(float angle)
+        public void updateCurrentPositionsFromOneJointMovement(double angle)
         {
             //Reality: Take the next set of rotation angle/ single angle, and generate the next points
             //If it's the end of the script, start again
@@ -864,24 +864,26 @@ namespace WenViz
             if (planeType == 0) //Y,Z plane
             {
                 //nextPositions = rotateByAngle(angle, assign x=y and y=z, z=x )
-                updatedPositions = rotateByAngle(planeType, (float) 0, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
+                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
                 
             }
 
             if (planeType == 1) //X,Z plane:
             {
                 //assign x=x, y=z, z=y
-                updatedPositions = rotateByAngle(planeType, (float) 0, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
+                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
             }
 
             if (planeType == 2) //x, y PLANE
             {
                 //ASSIGN x=x. y=y, z=z
-                updatedPositions = rotateByAngle(planeType, (float) 0, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
+                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
             }
 
             for (int i=0; i<3; i++) {
                 currentPositions[currentJointToMove][i] = updatedPositions[i];
+
+                
             }
 
             //updateadjacentPoints loop
@@ -892,7 +894,7 @@ namespace WenViz
             //update origins
 
             for (int jointNumber = 2; jointNumber<6; jointNumber++) {
-                //currentOrigins[jointNumber] = currentPositions[jointNumber-1];
+                currentOrigins[jointNumber] = currentPositions[jointNumber-1];
             }
 
         }
@@ -908,7 +910,7 @@ namespace WenViz
 
                 
 
-        public double[] rotateByAngle(int planeType, float angle, double OriginX, double OriginY, double OriginZ, double currentPointX, double currentPointY, double currentPointZ)
+        public double[] rotateByAngle(int planeType, double angle, double OriginX, double OriginY, double OriginZ, double currentPointX, double currentPointY, double currentPointZ)
         {
             double[] updatedPointCoordinates = new double[3];
 
@@ -957,6 +959,8 @@ namespace WenViz
             double vX = currentJointPosition[0] - adjacentJointPosition[0];
             double vY = currentJointPosition[1] - adjacentJointPosition[1];
             double vZ = currentJointPosition[2] - adjacentJointPosition[2];
+            Debug.WriteLine("cuurent: "+currentJointPosition[0]+" "+adjacentJointPosition[0]);
+            Debug.WriteLine("v: "+vX+" "+vY+" "+vZ);
 
             double vDistance = Math.Sqrt(Math.Pow(vX, 2) + Math.Pow(vY, 2) + Math.Pow(vZ, 2));
 
@@ -967,6 +971,8 @@ namespace WenViz
             currentPositions[adjacentJoint][0] = newAdjacentPositionX;
             currentPositions[adjacentJoint][1] = newAdjacentPositionY;
             currentPositions[adjacentJoint][2] = newAdjacentPositionZ;
+
+            Debug.WriteLine("new adj position: "+newAdjacentPositionX + " "+newAdjacentPositionY+" "+newAdjacentPositionZ);
 
 
 
