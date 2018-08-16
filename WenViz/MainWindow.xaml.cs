@@ -155,7 +155,14 @@ namespace WenViz
         private JointType[] wenArmJointTypes;
 
         //Starting XYZ coordinates for the 6 joints of the WEN arm
-        private double[][] startingPositions;
+        /*private static readonly double[][] startingPositions; /* = new double[][] {
+                new double[] {-0.0217254, 0.08669705, 0.7203828},
+                new double[] {-0.3217254, 0.38669705, 0.7203828},
+                new double[] {-0.4217254, 0.58669705, 0.7203828},
+                new double[] {-0.5217254, 0.58669705, 0.7203828},
+                new double[] {-0.6217254, 0.58669705, 0.7203828},
+                new double[] {-0.7217254, 0.38669705, 0.7203828}
+            }; */
 
         //Starting XYZ Origins of rotations for the 6 joints of the WEN arm
         private double[][] STARTING_ORIGINS;
@@ -185,7 +192,7 @@ namespace WenViz
             SetupKinect();
             SetupWENArm();
             SetupSharedWindowProperties();
-            SetUpStartingPositions();
+            //SetUpStartingPositions();
             SetUpOrigins();
             SetUpPlaneTypes();
             CacheJointDistances();
@@ -195,6 +202,18 @@ namespace WenViz
             InitializeComponent(); 
 
             Console.WriteLine("Status of the kinnect is "+kinectStatusText);
+            Debug.WriteLine("The original start position is "+getStartPositions()[3][0]);
+        }
+
+        private double[][] getStartPositions() {
+            return new double[][] {
+                new double[] {-0.0217254, 0.08669705, 0.7203828},
+                new double[] {-0.3217254, 0.38669705, 0.7203828},
+                new double[] {-0.4217254, 0.58669705, 0.7203828},
+                new double[] {-0.5217254, 0.58669705, 0.7203828},
+                new double[] {-0.6217254, 0.58669705, 0.7203828},
+                new double[] {-0.7217254, 0.38669705, 0.7203828}
+            };
         }
 
         private void ParseRotationAnglesForMovement()
@@ -203,7 +222,7 @@ namespace WenViz
             this.armRotationAngles = parser.GetCoordinates("dummy_data1.txt");
         }
 
-        private void SetUpStartingPositions()
+        /*private void SetUpStartingPositions()
         {
            this.startingPositions = new double[][]
             {
@@ -214,7 +233,7 @@ namespace WenViz
                 new double[] {-0.6217254, 0.58669705, 0.7203828},
                 new double[] {-0.7217254, 0.38669705, 0.7203828}
             };
-        }
+        }*/
 
         //REDO, builds but does not run (need to implement horrible loops from above)
         private void SetUpOrigins()
@@ -243,6 +262,7 @@ namespace WenViz
             };
 
         }
+
 
         private void SetupWENArm()
         {
@@ -436,7 +456,7 @@ namespace WenViz
             if (this.bodyFrameReader != null)
             {
                 this.bodyFrameReader.FrameArrived += this.Reader_FrameArrived;
-                Debug.Write("main window loaded");
+                //Debug.Write("main window loaded");
             }
         }
 
@@ -468,8 +488,11 @@ namespace WenViz
         /// <param name="e">event arguments</param>
         private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
-            Debug.Write("reader frame arrived being called");
+                                    Debug.WriteLine("start pos 0b:"+getStartPositions()[3][0]);
+            //Debug.Write("reader frame arrived being called");
             if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .25) {
+                
+                                    Debug.WriteLine("start pos 1a:"+getStartPositions()[3][0]);
                 DrawRepeatingWenArm();
                 lastTimeStamp = DateTime.Now;
             }
@@ -531,7 +554,7 @@ namespace WenViz
                             }
 
                             this.DrawBody(joints, jointPoints, dc, drawPen);
-                            Debug.Write("drawing person");
+                            //Debug.Write("drawing person");
 
                             this.DrawHand(body.HandLeftState, jointPoints[JointType.HandLeft], dc);
                             this.DrawHand(body.HandRightState, jointPoints[JointType.HandRight], dc);
@@ -721,7 +744,7 @@ namespace WenViz
                 foreach (JointType jointType in joints.Keys)
                 {
                     CameraSpacePoint position = joints[jointType].Position;
-                    Debug.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
+                    //Debug.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
                     DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
                     /*if(depthSpacePoint.X == Single.PositiveInfinity || depthSpacePoint.X == Single.NegativeInfinity)
                     {
@@ -735,8 +758,8 @@ namespace WenViz
                         depthSpacePoint.Y = 100; 
                     } */
                     jointPoints[jointType] = new Point(depthSpacePoint.X + ((float)this.displayWidth * (float) 0.5), depthSpacePoint.Y + ((float)this.displayHeight * (float) 0.5));
-                    Debug.WriteLine("wen Joint Positions: " + position.X + " " +position.Y + " " + position.Z);
-                    Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
+                    //Debug.WriteLine("wen Joint Positions: " + position.X + " " +position.Y + " " + position.Z);
+                    //Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
 
                 }
 
@@ -758,14 +781,23 @@ namespace WenViz
 
 
         private void DrawRepeatingWenArm() {
+                                    Debug.WriteLine("start pos 1b:"+getStartPositions()[3][0]);
                 DrawWenArm();
+                                    Debug.WriteLine("start pos 2:"+getStartPositions()[3][0]);
                 if(currentRowOfAngles >= armRotationAngles.Count) 
                 {
                     numberOfMoves = 0;
                     currentRowOfAngles = 0;
                     currentJointToMove = 0;
-                    currentPositions = startingPositions;
+                    Debug.WriteLine("reset: "+ getStartPositions()[3][0]);
+                    for (int i=0; i<6; i++) {
+                        for (int j=0; j<3; j++) {
+                            this.currentPositions[i][j] = getStartPositions()[i][j];
+                        }
+                    }
+                    //this.currentPositions = this.startingPositions;
                     Debug.WriteLine("Resetting");
+                    Debug.WriteLine("reset: "+ this.currentPositions[3][0]);
                 }
 
                 float angle = this.armRotationAngles[currentRowOfAngles][currentJointToMove];
@@ -781,7 +813,6 @@ namespace WenViz
         //Updates wen joints dictionary with the current coordinate 
         private void UpdateWenArmJointsFromCoordinate()
         {
-            
             //We create a list of tuples that have a mapping of a jointtype to a joint in the wen arm 
             for (int i = 0; i < wenArmJointTypes.Length; i++)
             {
@@ -834,7 +865,17 @@ namespace WenViz
 
         public void SetUpPositionUpdater() {
             
-            this.currentPositions = startingPositions;
+            currentPositions = new double[6][];
+            Array.Copy(getStartPositions(), currentPositions, getStartPositions().Length);
+
+            for(int i = 0; i < getStartPositions().Length; i++) {
+                for(int j = 0; j < getStartPositions()[i].Length; j++) {
+                    Debug.Write(currentPositions[i][j]);
+                    Debug.WriteLine("Here are the positions for the starting positions");
+                    Debug.WriteLine(getStartPositions()[i][j]);
+                }
+            }
+            //this.currentPositions = this.startingPositions;
             this.currentOrigins = STARTING_ORIGINS;
             this.currentRowOfAngles = 0;
             this.currentJointToMove = 0;
@@ -893,14 +934,14 @@ namespace WenViz
             }
 
             //updateadjacentPoints loop
-            for (int joint=currentJointToMove+1; joint<5; joint++) {
+            for (int joint=currentJointToMove+1; joint<6; joint++) {
                 bool toolong=false;
                 //updateAdjacentJoint(joint, joint+1);
                 if (CalculateCurrentDistance(joint-1, joint) > relativeJointDistances[joint-1]) {
                     
                     toolong = CalculateCurrentDistance(joint-1, joint) > relativeJointDistances[joint-1];
                     while (toolong==true) {
-                        Debug.WriteLine("too long!");
+                        //Debug.WriteLine("too long!");
                         double newX = (currentPositions[joint][0]-currentPositions[joint-1][0])/100;
                         double newY = (currentPositions[joint][1]-currentPositions[joint-1][1])/100;
                         double newZ = (currentPositions[joint][2]-currentPositions[joint-1][2])/100;
@@ -908,14 +949,14 @@ namespace WenViz
                         currentPositions[joint][1]-=newY;
                         currentPositions[joint][2]-=newZ;
                         toolong = CalculateCurrentDistance(joint-1, joint) > relativeJointDistances[joint-1];
-                        Debug.WriteLine("new distance"+ CalculateCurrentDistance(joint-1, joint));
+                        //Debug.WriteLine("new distance"+ CalculateCurrentDistance(joint-1, joint));
                     }
                     }                                                                                                                           
                 }
 
             //update origins
 
-            for (int jointNumber = 2; jointNumber<6; jointNumber++) {
+            for (int jointNumber = 1; jointNumber<6; jointNumber++) {
                 currentOrigins[jointNumber] = currentPositions[jointNumber-1];
             }
 
@@ -940,6 +981,10 @@ namespace WenViz
             double nextPointY;
             double nextPointZ;
 
+            //nextPointX = OriginX + Math.Cos(angle) * (currentPointX - OriginX) - Math.Sin(angle) * (currentPointY - OriginY);
+            //nextPointY = OriginY + Math.Sin(angle) * (currentPointX - OriginX) + Math.Cos(angle) * (currentPointY - OriginY);
+            //nextPointZ = currentPointZ;
+
             nextPointX = OriginX + Math.Cos(angle) * (currentPointX - OriginX) - Math.Sin(angle) * (currentPointY - OriginY);
             nextPointY = OriginY + Math.Sin(angle) * (currentPointX - OriginX) + Math.Cos(angle) * (currentPointY - OriginY);
             nextPointZ = currentPointZ;
@@ -963,11 +1008,11 @@ namespace WenViz
             }
 
 
-
+            /*
             Debug.WriteLine(currentPointX + " " + nextPointX);
             Debug.WriteLine(currentPointY + " " + nextPointY);
             Debug.WriteLine(currentPointZ + " " + nextPointZ);
-
+            */
             
             return updatedPointCoordinates;
         }
@@ -981,8 +1026,10 @@ namespace WenViz
             double vX = currentJointPosition[0] - adjacentJointPosition[0];
             double vY = currentJointPosition[1] - adjacentJointPosition[1];
             double vZ = currentJointPosition[2] - adjacentJointPosition[2];
+            /*
             Debug.WriteLine("cuurent: "+currentJointPosition[0]+" "+adjacentJointPosition[0]);
             Debug.WriteLine("v: "+vX+" "+vY+" "+vZ);
+            */
 
             double vDistance = Math.Sqrt(Math.Pow(vX, 2) + Math.Pow(vY, 2) + Math.Pow(vZ, 2));
 
@@ -994,7 +1041,7 @@ namespace WenViz
             currentPositions[adjacentJoint][1] = newAdjacentPositionY;
             currentPositions[adjacentJoint][2] = newAdjacentPositionZ;
 
-            Debug.WriteLine("new adj position: "+newAdjacentPositionX + " "+newAdjacentPositionY+" "+newAdjacentPositionZ);
+            //Debug.WriteLine("new adj position: "+newAdjacentPositionX + " "+newAdjacentPositionY+" "+newAdjacentPositionZ);
 
 
 
@@ -1012,12 +1059,12 @@ namespace WenViz
 
         private double CalculateDistance(int a, int b)  
         {
-            double aX = this.startingPositions[a][0];
-            double aY = this.startingPositions[a][1];
-            double aZ = this.startingPositions[a][2];
-            double bX = this.startingPositions[b][0];
-            double bY = this.startingPositions[b][1];
-            double bZ = this.startingPositions[b][2];
+            double aX = getStartPositions()[a][0];
+            double aY = getStartPositions()[a][1];
+            double aZ = getStartPositions()[a][2];
+            double bX = getStartPositions()[b][0];
+            double bY = getStartPositions()[b][1];
+            double bZ = getStartPositions()[b][2];
 
             var radical = Math.Pow(bX - aX, 2)
                 + Math.Pow(bY - aY, 2) 
