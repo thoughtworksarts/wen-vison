@@ -855,6 +855,15 @@ namespace WenViz
             //grabbing array of current x, y, z positions from current positions array -- which contains all positions
             double[] currentJointXYZPositions = this.currentPositions[currentJointToMove]; //will be an [X,Y,Z] array
 
+            Debug.WriteLine("current joints:");
+            foreach (double x in currentJointXYZPositions) {
+                Debug.WriteLine(x);
+            }
+            Debug.WriteLine("current origins:");
+            foreach (double x in origin) {
+                Debug.WriteLine(x);
+            }
+
             //grabbing the plane that the current joint moves in (I.e. X-Y, X-Z)
             int planeType = determineRotationAxis(planeTypes[currentJointToMove]);
             Debug.WriteLine("Plane type: " + planeType);
