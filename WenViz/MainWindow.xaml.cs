@@ -879,7 +879,7 @@ namespace WenViz
             }
 
             for (int i=0; i<3; i++) {
-                //currentPositions[currentJointToMove][i] = updatedPositions[i];
+                currentPositions[currentJointToMove][i] = updatedPositions[i];
             }
 
             //updateadjacentPoints loop
