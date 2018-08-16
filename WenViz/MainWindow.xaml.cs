@@ -873,20 +873,20 @@ namespace WenViz
             if (planeType == 0) //Y,Z plane
             {
                 //nextPositions = rotateByAngle(angle, assign x=y and y=z, z=x )
-                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
+                updatedPositions = rotateByAngle(planeType,  (angle*Math.PI)/180, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
                 
             }
 
             if (planeType == 1) //X,Z plane:
             {
                 //assign x=x, y=z, z=y
-                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
+                updatedPositions = rotateByAngle(planeType,  (angle*Math.PI)/180, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
             }
 
             if (planeType == 2) //x, y PLANE
             {
                 //ASSIGN x=x. y=y, z=z
-                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
+                updatedPositions = rotateByAngle(planeType,  (angle*Math.PI)/180, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
             }
 
             for (int i=0; i<3; i++) {
@@ -894,8 +894,29 @@ namespace WenViz
             }
 
             //updateadjacentPoints loop
-            /*for (int joint=currentJointToMove; joint<5; joint++) {
+            for (int joint=currentJointToMove+1; joint<5; joint++) {
+                bool toolong=false;
                 //updateAdjacentJoint(joint, joint+1);
+                if (CalculateCurrentDistance(joint-1, joint) > relativeJointDistances[joint-1]) {
+                    
+                    toolong = CalculateCurrentDistance(joint-1, joint) > relativeJointDistances[joint-1];
+                    while (toolong==true) {
+                        Debug.WriteLine("too long!");
+                        double newX = (currentPositions[joint][0]-currentPositions[joint-1][0])/100;
+                        double newY = (currentPositions[joint][1]-currentPositions[joint-1][1])/100;
+                        double newZ = (currentPositions[joint][2]-currentPositions[joint-1][2])/100;
+                        currentPositions[joint][0]-=newX;
+                        currentPositions[joint][1]-=newY;
+                        currentPositions[joint][2]-=newZ;
+                        toolong = CalculateCurrentDistance(joint-1, joint) > relativeJointDistances[joint-1];
+                        Debug.WriteLine("new distance"+ CalculateCurrentDistance(joint-1, joint));
+                    }
+
+                    //find line
+                    //move along the line toward new point
+                    }                                                                                                                           
+                }
+            /*
                 planeType = determineRotationAxis(planeTypes[joint]);
                 //double[] origin = currentOrigins[currentJointToMove];
             //grabbing array of current x, y, z positions from current positions array -- which contains all positions
@@ -1026,6 +1047,22 @@ namespace WenViz
             double bX = this.startingPositions[b][0];
             double bY = this.startingPositions[b][1];
             double bZ = this.startingPositions[b][2];
+
+            var radical = Math.Pow(bX - aX, 2)
+                + Math.Pow(bY - aY, 2) 
+                + Math.Pow(bZ - aZ, 2); 
+
+            return Math.Sqrt(radical);
+        }
+
+        private double CalculateCurrentDistance(int a, int b)  
+        {
+            double aX = this.currentPositions[a][0];
+            double aY = this.currentPositions[a][1];
+            double aZ = this.currentPositions[a][2];
+            double bX = this.currentPositions[b][0];
+            double bY = this.currentPositions[b][1];
+            double bZ = this.currentPositions[b][2];
 
             var radical = Math.Pow(bX - aX, 2)
                 + Math.Pow(bY - aY, 2) 
