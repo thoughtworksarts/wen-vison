@@ -469,10 +469,10 @@ namespace WenViz
         private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             Debug.Write("reader frame arrived being called");
-            //if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .55) {
-                //DrawRepeatingWenArm();
-                //lastTimeStamp = DateTime.Now;
-            //}
+            if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .55) {
+                DrawRepeatingWenArm();
+                lastTimeStamp = DateTime.Now;
+            }
             bool dataReceived = false;
 
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
