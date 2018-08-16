@@ -207,11 +207,11 @@ namespace WenViz
         {
            this.startingPositions = new double[][]
             {
-                new double[] {-0.3517254, 1.09669705, 0.7703828},
+                new double[] {-0.3517254, 0.09669705, 0.7703828},
                 new double[] {-0.3217254, 0.08669705, 0.7203828},
-                new double[] {-0.4517254, 1.09569705, 0.7708828},
+                new double[] {-0.4517254, 0.09569705, 0.7708828},
                 new double[] {-0.5517254, 0.09629705, 0.6703828},
-                new double[] {-0.3017254, 1.08669705, 0.7703828},
+                new double[] {-0.3017254, 0.08669705, 0.7703828},
                 new double[] {-0.4517254, 0.09669705, 0.7503828}
             };
         }
@@ -224,9 +224,9 @@ namespace WenViz
                 new double[] {-0.3517254, 0.09669705, 0.7703828},
                 new double[] {-0.3517254, 0.09669705, 0.7703828},
                 new double[] {-0.3217254, 0.08669705, 0.7203828},
-                new double[] {-0.4517254, 1.09569705, 0.7708828},
+                new double[] {-0.4517254, 0.09569705, 0.7708828},
                 new double[] {-0.5517254, 0.09629705, 0.6703828},
-                new double[] {-0.3017254, 1.08669705, 0.7703828}
+                new double[] {-0.3017254, 0.08669705, 0.7703828}
             };
         }
 
@@ -519,7 +519,9 @@ namespace WenViz
                                 // clamp down to 0.1f to prevent coordinatemapper from returning (-Infinity, -Infinity)
                                 CameraSpacePoint position = joints[jointType].Position;
                                 Debug.WriteLine("Kinect Joint Positions: " + position.X + " " +position.Y + " " + position.Z);
-                                if (position.Z < 0)
+                                //Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
+
+                            if (position.Z < 0)
                                 {
                                     position.Z = InferredZPositionClamp;
                                 }
@@ -699,14 +701,14 @@ namespace WenViz
         //AndyA - Need to add the startPositions as the XYZ Position attribute for each joint... how to do this? 
         private void DrawWenArm()
         {
-            //UpdateWenArmJointsFromCoordinate(); //this will actually update from the first row of the coordinates using the updater
+            UpdateWenArmJointsFromCoordinate(); //this will actually update from the first row of the coordinates using the updater
 
             using (DrawingContext dc = this.wenArmDrawingGroup.Open())
             {
                 
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.Brown, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-                /*
+                
                 //we're going to just use a pen index of 0 for now
                 int penIndex = 0;
                 Pen drawPen = this.bodyColors[penIndex];
@@ -721,7 +723,7 @@ namespace WenViz
                     CameraSpacePoint position = joints[jointType].Position;
                     Debug.WriteLine("the position is " + position.X + " " + position.Y+ " "+position.Z);
                     DepthSpacePoint depthSpacePoint = this.coordinateMapper.MapCameraPointToDepthSpace(position);
-                    if(depthSpacePoint.X == Single.PositiveInfinity || depthSpacePoint.X == Single.NegativeInfinity)
+                    /*if(depthSpacePoint.X == Single.PositiveInfinity || depthSpacePoint.X == Single.NegativeInfinity)
                     {
                         Debug.WriteLine("We have pos infinity for x point ");
                         depthSpacePoint.X = 100; 
@@ -731,8 +733,9 @@ namespace WenViz
                     {
                         Debug.WriteLine("We have pos infinity for x point ");
                         depthSpacePoint.Y = 100; 
-                    } 
-                    jointPoints[jointType] = new Point(depthSpacePoint.X/836, depthSpacePoint.Y/836);
+                    } */
+                    jointPoints[jointType] = new Point(depthSpacePoint.X + ((float)this.displayWidth * (float) 0.5), depthSpacePoint.Y + ((float)this.displayHeight * (float) 0.5));
+                    Debug.WriteLine("wen Joint Positions: " + position.X + " " +position.Y + " " + position.Z);
                     Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
 
                 }
@@ -749,7 +752,7 @@ namespace WenViz
                 //this.DrawHand(HandState.Closed, new Point(handDepthSpacePoint.X, handDepthSpacePoint.Y), dc);
 
                 this.wenArmDrawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-                */dc.DrawEllipse(Brushes.Beige, null, new Point(5.5, 5.5),5.5, 5.5);
+                dc.DrawEllipse(Brushes.Beige, null, new Point(this.displayWidth*0.5, this.displayHeight*0.5),5.5, 5.5);
             }
         }
 
@@ -785,9 +788,9 @@ namespace WenViz
             
                 wenJoint.TrackingState = TrackingState.Tracked;
                 CameraSpacePoint point = new CameraSpacePoint();
-                point.X = (float) currentPositions[i][0]*50;
-                point.Y = (float) currentPositions[i][1]*50;
-                point.Z = (float) currentPositions[i][2]*50;
+                point.X = (float) currentPositions[i][0];
+                point.Y = (float) currentPositions[i][1];
+                point.Z = (float) currentPositions[i][2];
 
                 //point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
                 wenJoint.Position = point;
