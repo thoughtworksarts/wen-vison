@@ -183,6 +183,17 @@ namespace WenViz
 
         private DateTime lastTimeStamp;
 
+        private JointType[] personJointsToRender = new JointType[] {
+            JointType.ShoulderRight,
+              JointType.ElbowRight,
+              JointType.WristRight,
+              JointType.HandRight,
+              JointType.HandTipRight,
+              JointType.ThumbRight
+        };
+
+        private Boolean isRenderingWholeBody = false;
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -304,16 +315,6 @@ namespace WenViz
             // a bone defined as a line between two joints
             this.personBones = new List<Tuple<JointType, JointType>>();
 
-            // Torso
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.Head, JointType.Neck));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.Neck, JointType.SpineShoulder));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.SpineMid));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineMid, JointType.SpineBase));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderRight));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderLeft));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipRight));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipLeft));
-
             // Right Arm
             this.personBones.Add(new Tuple<JointType, JointType>(JointType.ShoulderRight, JointType.ElbowRight));
             this.personBones.Add(new Tuple<JointType, JointType>(JointType.ElbowRight, JointType.WristRight));
@@ -321,23 +322,35 @@ namespace WenViz
             this.personBones.Add(new Tuple<JointType, JointType>(JointType.HandRight, JointType.HandTipRight));
             this.personBones.Add(new Tuple<JointType, JointType>(JointType.WristRight, JointType.ThumbRight));
 
-            // Left Arm
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.ShoulderLeft, JointType.ElbowLeft));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.ElbowLeft, JointType.WristLeft));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.WristLeft, JointType.HandLeft));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.HandLeft, JointType.HandTipLeft));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.WristLeft, JointType.ThumbLeft));
+            if(isRenderingWholeBody) {
+                
+                // Torso
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.Head, JointType.Neck));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.Neck, JointType.SpineShoulder));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.SpineMid));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineMid, JointType.SpineBase));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderRight));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineShoulder, JointType.ShoulderLeft));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipRight));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.SpineBase, JointType.HipLeft));
 
-            // Right Leg
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.HipRight, JointType.KneeRight));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.KneeRight, JointType.AnkleRight));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.AnkleRight, JointType.FootRight));
+                // Left Arm
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.ShoulderLeft, JointType.ElbowLeft));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.ElbowLeft, JointType.WristLeft));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.WristLeft, JointType.HandLeft));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.HandLeft, JointType.HandTipLeft));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.WristLeft, JointType.ThumbLeft));
 
-            // Left Leg
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.HipLeft, JointType.KneeLeft));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.KneeLeft, JointType.AnkleLeft));
-            this.personBones.Add(new Tuple<JointType, JointType>(JointType.AnkleLeft, JointType.FootLeft));
+                // Right Leg
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.HipRight, JointType.KneeRight));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.KneeRight, JointType.AnkleRight));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.AnkleRight, JointType.FootRight));
 
+                // Left Leg
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.HipLeft, JointType.KneeLeft));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.KneeLeft, JointType.AnkleLeft));
+                this.personBones.Add(new Tuple<JointType, JointType>(JointType.AnkleLeft, JointType.FootLeft));
+            }
             // set IsAvailableChanged event notifier
             this.kinectSensor.IsAvailableChanged += this.Sensor_IsAvailableChanged;
 
@@ -520,7 +533,7 @@ namespace WenViz
                 using (DrawingContext dc = this.personDrawingGroup.Open())
                 {
                     // Draw a transparent background to set the render size
-                    dc.DrawRectangle(Brushes.Brown, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                    dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
 
                     int penIndex = 0;
                     foreach (Body body in this.bodies)
@@ -563,7 +576,7 @@ namespace WenViz
 
                     // prevent drawing outside of our render area
                     this.personDrawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-                    dc.DrawEllipse(Brushes.Beige, null, new Point(5.5, 5.5),5.5, 5.5);
+                    //dc.DrawEllipse(Brushes.Beige, null, new Point(5.5, 5.5),5.5, 5.5);
                 }
             }
         }
@@ -597,22 +610,24 @@ namespace WenViz
             // Draw the joints
             foreach (JointType jointType in joints.Keys)
             {
-                Brush drawBrush = null;
-                TrackingState trackingState = joints[jointType].TrackingState;
+                if((personJointsToRender.Contains(jointType) && !isRenderingWholeBody) || isRenderingWholeBody) {
+                    Brush drawBrush = null;
+                    TrackingState trackingState = joints[jointType].TrackingState;
 
-                if (trackingState == TrackingState.Tracked)
-                {
-                    drawBrush = this.trackedJointBrush;
-                }
-                else if (trackingState == TrackingState.Inferred)
-                {
-                    drawBrush = this.inferredJointBrush;
-                }
+                    if (trackingState == TrackingState.Tracked)
+                    {
+                        drawBrush = this.trackedJointBrush;
+                    }
+                    else if (trackingState == TrackingState.Inferred)
+                    {
+                        drawBrush = this.inferredJointBrush;
+                    }
 
-                if (drawBrush != null)
-                {
-                    drawingContext.DrawEllipse(drawBrush, null, jointPoints[jointType], JointThickness, JointThickness);
-                    //Debug.WriteLine("We are drawing the joint "+jointType+" on the screen at "+jointPoints[jointType].X+" and "+jointPoints[jointType].Y);
+                    if (drawBrush != null)
+                    {
+                        drawingContext.DrawEllipse(drawBrush, null, jointPoints[jointType], JointThickness, JointThickness);
+                        //Debug.WriteLine("We are drawing the joint "+jointType+" on the screen at "+jointPoints[jointType].X+" and "+jointPoints[jointType].Y);
+                    }
                 }
             }
         }
@@ -730,10 +745,10 @@ namespace WenViz
             {
                 
                 // Draw a transparent background to set the render size
-                dc.DrawRectangle(Brushes.Brown, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                 
                 //we're going to just use a pen index of 0 for now
-                int penIndex = 0;
+                int penIndex = 1;
                 Pen drawPen = this.bodyColors[penIndex];
 
                 IReadOnlyDictionary<JointType, Joint> joints = wenJointsDictionary;
@@ -801,7 +816,7 @@ namespace WenViz
                 //this.DrawHand(HandState.Closed, new Point(handDepthSpacePoint.X, handDepthSpacePoint.Y), dc);
 
                 this.wenArmDrawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-                dc.DrawEllipse(Brushes.Beige, null, new Point(this.displayWidth*0.5, this.displayHeight*0.5),5.5, 5.5);
+                //dc.DrawEllipse(Brushes.Beige, null, new Point(this.displayWidth*0.5, this.displayHeight*0.5),5.5, 5.5);
             }
         }
 
