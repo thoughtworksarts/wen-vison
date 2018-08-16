@@ -222,7 +222,7 @@ namespace WenViz
            this.STARTING_ORIGINS = new double[][]
             {
                 new double[] {-0.2217254, 0.58669705, 0.7203828},
-                new double[] {-0.2217254, 0.58669705, 0.7203828},
+                new double[] {-0.8217254, 0.58669705, 0.7203828},
                 new double[] {-0.3217254, 0.58669705, 0.7203828},
                 new double[] {-0.4217254, 0.58669705, 0.7203828},
                 new double[] {-0.5217254, 0.58669705, 0.7203828},
@@ -469,7 +469,7 @@ namespace WenViz
         private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             Debug.Write("reader frame arrived being called");
-            if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .55) {
+            if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .25) {
                 DrawRepeatingWenArm();
                 lastTimeStamp = DateTime.Now;
             }
@@ -928,8 +928,8 @@ namespace WenViz
 
             if (planeType == 1) {
                 updatedPointCoordinates.SetValue(nextPointX, 0);
-                updatedPointCoordinates.SetValue(nextPointZ, 2);
-                updatedPointCoordinates.SetValue(nextPointY, 1);
+                updatedPointCoordinates.SetValue(nextPointY, 2);
+                updatedPointCoordinates.SetValue(nextPointZ, 1);
             }
 
             if (planeType == 2) {
