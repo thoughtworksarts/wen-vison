@@ -891,14 +891,35 @@ namespace WenViz
 
             for (int i=0; i<3; i++) {
                 currentPositions[currentJointToMove][i] = updatedPositions[i];
-
-                
             }
 
             //updateadjacentPoints loop
-            for (int joint=currentJointToMove; joint<5; joint++) {
+            /*for (int joint=currentJointToMove; joint<5; joint++) {
                 //updateAdjacentJoint(joint, joint+1);
+                planeType = determineRotationAxis(planeTypes[joint]);
+                //double[] origin = currentOrigins[currentJointToMove];
+            //grabbing array of current x, y, z positions from current positions array -- which contains all positions
+                double[] currentJointXYZPositions2 = this.currentPositions[joint];
+            if (planeType == 0) //Y,Z plane
+            {
+                //nextPositions = rotateByAngle(angle, assign x=y and y=z, z=x )
+                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[1], origin[2], origin[0], currentJointXYZPositions2[1], currentJointXYZPositions2[2], currentJointXYZPositions2[0]);
+                
             }
+
+            if (planeType == 1) //X,Z plane:
+            {
+                //assign x=x, y=z, z=y
+                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[0], origin[2], origin[1], currentJointXYZPositions2[0], currentJointXYZPositions2[2], currentJointXYZPositions2[1]);
+            }
+
+            if (planeType == 2) //x, y PLANE
+            {
+                //ASSIGN x=x. y=y, z=z
+                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[0], origin[1], origin[2], currentJointXYZPositions2[0], currentJointXYZPositions2[1], currentJointXYZPositions2[2]);
+            }   
+            
+            }*/
 
             //update origins
 
