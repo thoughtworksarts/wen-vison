@@ -518,7 +518,7 @@ namespace WenViz
                                 // sometimes the depth(Z) of an inferred joint may show as negative
                                 // clamp down to 0.1f to prevent coordinatemapper from returning (-Infinity, -Infinity)
                                 CameraSpacePoint position = joints[jointType].Position;
-                                Debug.WriteLine("Kinect Joint Positions: " + position.X + " " +position.Y + " " + position.Z);
+                                //Debug.WriteLine("Kinect Joint Positions: " + position.X + " " +position.Y + " " + position.Z);
                                 //Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
 
                             if (position.Z < 0)
@@ -767,6 +767,7 @@ namespace WenViz
                 }
 
                 float angle = this.armRotationAngles[currentRowOfAngles][currentJointToMove];
+                Debug.WriteLine("angle " + angle);
                 updateCurrentPositionsFromOneJointMovement(angle);
                 this.numberOfMoves++;
                 this.currentRowOfAngles = (int) Math.Floor((decimal) numberOfMoves/6);
@@ -856,26 +857,27 @@ namespace WenViz
 
             //grabbing the plane that the current joint moves in (I.e. X-Y, X-Z)
             int planeType = determineRotationAxis(planeTypes[currentJointToMove]);
+            Debug.WriteLine("Plane type: " + planeType);
 
             //assign X, Y, and Z according to the planeType,, where X and Y become the relevent axes in the plane (could be X and Z) and Z is assigned to the rotation axis
             double[] updatedPositions = new double[3];
             if (planeType == 0) //Y,Z plane
             {
                 //nextPositions = rotateByAngle(angle, assign x=y and y=z, z=x )
-                updatedPositions = rotateByAngle((float) 0, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
+                updatedPositions = rotateByAngle(planeType, (float) 0, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
                 
-}
+            }
 
             if (planeType == 1) //X,Z plane:
             {
                 //assign x=x, y=z, z=y
-                updatedPositions = rotateByAngle((float) 0, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
+                updatedPositions = rotateByAngle(planeType, (float) 0, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
             }
 
             if (planeType == 2) //x, y PLANE
             {
                 //ASSIGN x=x. y=y, z=z
-                updatedPositions = rotateByAngle((float) 0, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
+                updatedPositions = rotateByAngle(planeType, (float) 0, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
             }
 
             for (int i=0; i<3; i++) {
@@ -906,7 +908,7 @@ namespace WenViz
 
                 
 
-        public double[] rotateByAngle(float angle, double OriginX, double OriginY, double OriginZ, double currentPointX, double currentPointY, double currentPointZ)
+        public double[] rotateByAngle(int planeType, float angle, double OriginX, double OriginY, double OriginZ, double currentPointX, double currentPointY, double currentPointZ)
         {
             double[] updatedPointCoordinates = new double[3];
 
@@ -915,12 +917,32 @@ namespace WenViz
             double nextPointZ;
 
             nextPointX = OriginX + Math.Cos(angle) * (currentPointX - OriginX) - Math.Sin(angle) * (currentPointY - OriginY);
-            nextPointY = OriginY + Math.Sin(angle) * (currentPointX - OriginX) - Math.Cos(angle) * (currentPointY - OriginY);
+            nextPointY = OriginY + Math.Sin(angle) * (currentPointX - OriginX) + Math.Cos(angle) * (currentPointY - OriginY);
             nextPointZ = currentPointZ;
 
-            updatedPointCoordinates.SetValue(nextPointX, 0);
-            updatedPointCoordinates.SetValue(nextPointY, 1);
-            updatedPointCoordinates.SetValue(nextPointZ, 2);
+            if (planeType == 0) {
+                updatedPointCoordinates.SetValue(nextPointX, 1);
+                updatedPointCoordinates.SetValue(nextPointY, 2);
+                updatedPointCoordinates.SetValue(nextPointZ, 0);
+            }
+
+            if (planeType == 1) {
+                updatedPointCoordinates.SetValue(nextPointX, 0);
+                updatedPointCoordinates.SetValue(nextPointZ, 2);
+                updatedPointCoordinates.SetValue(nextPointY, 1);
+            }
+
+            if (planeType == 2) {
+                updatedPointCoordinates.SetValue(nextPointX, 0);
+                updatedPointCoordinates.SetValue(nextPointY, 1);
+                updatedPointCoordinates.SetValue(nextPointZ, 2);
+            }
+
+
+
+            Debug.WriteLine(currentPointX + " " + nextPointX);
+            Debug.WriteLine(currentPointY + " " + nextPointY);
+            Debug.WriteLine(currentPointZ + " " + nextPointZ);
 
             
             return updatedPointCoordinates;
