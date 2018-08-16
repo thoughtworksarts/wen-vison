@@ -490,7 +490,7 @@ namespace WenViz
         {
                                     Debug.WriteLine("start pos 0b:"+getStartPositions()[3][0]);
             //Debug.Write("reader frame arrived being called");
-            if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .25) {
+            if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .21) {
                 
                                     Debug.WriteLine("start pos 1a:"+getStartPositions()[3][0]);
                 DrawRepeatingWenArm();
@@ -757,7 +757,33 @@ namespace WenViz
                         Debug.WriteLine("We have pos infinity for x point ");
                         depthSpacePoint.Y = 100; 
                     } */
-                    jointPoints[jointType] = new Point(depthSpacePoint.X + ((float)this.displayWidth * (float) 0.5), depthSpacePoint.Y + ((float)this.displayHeight * (float) 0.5));
+
+                    float offsetX = ( this.displayWidth * (float) 0.25);
+                    float renderingPointX = (float) 0.75 *depthSpacePoint.X;
+                    float offsetY = ( this.displayHeight * (float) 0.5);
+                    float renderingPointY = (float) 0.75 * depthSpacePoint.Y;
+
+                    if(renderingPointX + offsetX >= this.displayWidth) {
+                        renderingPointX = displayWidth- (float) .05 * this.displayWidth;
+                        offsetX = 0;
+                    }
+
+                    if(renderingPointX + offsetX < 0) {
+                        renderingPointX = (float) .05 * this.displayWidth; 
+                        offsetX = 0;
+                    }
+
+                    if(renderingPointY + offsetY >= this.displayHeight) {
+                        renderingPointY = displayHeight- (float) 0.05 * displayHeight; 
+                        offsetY = 0;
+                    }
+
+                    if(renderingPointY + offsetY < 0) {
+                        renderingPointY = (float) 0.05 * displayHeight;
+                        offsetY = 0;
+                    }
+
+                    jointPoints[jointType] = new Point(renderingPointX + offsetX, renderingPointY + offsetY);
                     //Debug.WriteLine("wen Joint Positions: " + position.X + " " +position.Y + " " + position.Z);
                     //Debug.WriteLine("the depth point is " + depthSpacePoint.X + " "+ depthSpacePoint.Y);
 
