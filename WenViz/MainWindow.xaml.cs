@@ -207,12 +207,12 @@ namespace WenViz
         {
            this.startingPositions = new double[][]
             {
-                new double[] {-0.2831486, 0.2687793, 1.042485},
-                new double[] {-0.5486, 0.2687793, 1.042485},
-                new double[] {-0.7831486, 0.2687793, 1.042485},
-                new double[] {-0.9831486, 0.3687793, 1.142485},
-                new double[] {-0.2831486, 0.4687793, 1.042485},
-                new double[] {-0.2831486, 0.6687793, 1.542485}
+                new double[] {-0.3517254, 1.09669705, 0.7703828},
+                new double[] {-0.3217254, 0.08669705, 0.7203828},
+                new double[] {-0.4517254, 1.09569705, 0.7708828},
+                new double[] {-0.5517254, 0.09629705, 0.6703828},
+                new double[] {-0.3017254, 1.08669705, 0.7703828},
+                new double[] {-0.4517254, 0.09669705, 0.7503828}
             };
         }
 
@@ -221,12 +221,12 @@ namespace WenViz
         {
            this.STARTING_ORIGINS = new double[][]
             {
-                new double[] {0, 0, 0},
-                new double[] {0, 0, 0},
-                new double[] {-0.5486, 0.2687793, 1.042485},
-                new double[] {-0.7831486, 0.2687793, 1.042485},
-                new double[] {-0.9831486, 0.3687793, 1.142485},
-                new double[] {-0.2831486, 0.4687793, 1.042485} 
+                new double[] {-0.3517254, 0.09669705, 0.7703828},
+                new double[] {-0.3517254, 0.09669705, 0.7703828},
+                new double[] {-0.3217254, 0.08669705, 0.7203828},
+                new double[] {-0.4517254, 1.09569705, 0.7708828},
+                new double[] {-0.5517254, 0.09629705, 0.6703828},
+                new double[] {-0.3017254, 1.08669705, 0.7703828}
             };
         }
 
@@ -357,8 +357,8 @@ namespace WenViz
             }
             else
             {
-                this.displayWidth = 5120;
-                this.displayHeight = 4240; 
+                this.displayWidth = 512;
+                this.displayHeight = 424; 
             }
 
             // populate body colors, one for each BodyIndex
@@ -469,10 +469,10 @@ namespace WenViz
         private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             Debug.Write("reader frame arrived being called");
-            if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .25) {
-                DrawRepeatingWenArm();
-                lastTimeStamp = DateTime.Now;
-            }
+            //if(DateTime.Now.Subtract(lastTimeStamp).TotalSeconds > .55) {
+                //DrawRepeatingWenArm();
+                //lastTimeStamp = DateTime.Now;
+            //}
             bool dataReceived = false;
 
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
@@ -518,6 +518,7 @@ namespace WenViz
                                 // sometimes the depth(Z) of an inferred joint may show as negative
                                 // clamp down to 0.1f to prevent coordinatemapper from returning (-Infinity, -Infinity)
                                 CameraSpacePoint position = joints[jointType].Position;
+                                Debug.WriteLine("Kinect Joint Positions: " + position.X + " " +position.Y + " " + position.Z);
                                 if (position.Z < 0)
                                 {
                                     position.Z = InferredZPositionClamp;
@@ -537,6 +538,7 @@ namespace WenViz
 
                     // prevent drawing outside of our render area
                     this.personDrawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                    dc.DrawEllipse(Brushes.Beige, null, new Point(5.5, 5.5),5.5, 5.5);
                 }
             }
         }
@@ -697,13 +699,14 @@ namespace WenViz
         //AndyA - Need to add the startPositions as the XYZ Position attribute for each joint... how to do this? 
         private void DrawWenArm()
         {
-            UpdateWenArmJointsFromCoordinate(); //this will actually update from the first row of the coordinates using the updater
+            //UpdateWenArmJointsFromCoordinate(); //this will actually update from the first row of the coordinates using the updater
 
             using (DrawingContext dc = this.wenArmDrawingGroup.Open())
             {
+                
                 // Draw a transparent background to set the render size
-                //dc.DrawRectangle(Brushes.Brown, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
-
+                dc.DrawRectangle(Brushes.Brown, null, new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                /*
                 //we're going to just use a pen index of 0 for now
                 int penIndex = 0;
                 Pen drawPen = this.bodyColors[penIndex];
@@ -746,6 +749,7 @@ namespace WenViz
                 //this.DrawHand(HandState.Closed, new Point(handDepthSpacePoint.X, handDepthSpacePoint.Y), dc);
 
                 this.wenArmDrawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
+                */dc.DrawEllipse(Brushes.Beige, null, new Point(5.5, 5.5),5.5, 5.5);
             }
         }
 
@@ -781,9 +785,9 @@ namespace WenViz
             
                 wenJoint.TrackingState = TrackingState.Tracked;
                 CameraSpacePoint point = new CameraSpacePoint();
-                point.X = (float) currentPositions[i][0]*50 % displayWidth;
-                point.Y = (float) currentPositions[i][1]*50 % displayWidth;
-                point.Z = (float) currentPositions[i][2]*50 % displayWidth;
+                point.X = (float) currentPositions[i][0]*50;
+                point.Y = (float) currentPositions[i][1]*50;
+                point.Z = (float) currentPositions[i][2]*50;
 
                 //point.Y = coordinate[i]; //for now let's assign our coordinate to the y axis for every arm joint
                 wenJoint.Position = point;
@@ -841,21 +845,6 @@ namespace WenViz
             //If it's the end of the script, start again
 
             //call nextPositionFromOneJointMovement
-            Random random = new Random();
-
-            //this.updatedPositions = 
-                    
-                               this.currentPositions = new double[][]
-                                {
-                                    //this should actually set updatedPositions
-                                    //set currentPositions = updatedPositions
-                                    new double[] {10, 10 + (float) random.Next(1,100),1000},
-                                    new double[] {10,-1000+0+ (float) random.Next(1,100),300},
-                                    new double[] {1000-300+10+ (float) random.Next(1,100),-1000+0,300},
-                                    new double[] {40,-1000+0+10+(float) (random.Next(1,100)),300},
-                                    new double[] {10+10+(float) random.Next(1,100),-1000+0+10,250},
-                                    new double[] {1000-400+(float) random.Next(1,100),-1000+0+10,200}
-                                };
 
             double[] origin = currentOrigins[currentJointToMove];
 
