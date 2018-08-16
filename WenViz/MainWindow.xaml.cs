@@ -207,12 +207,12 @@ namespace WenViz
         {
            this.startingPositions = new double[][]
             {
-                new double[] {-0.2217254, 0.58669705, 0.7203828},
-                new double[] {-0.3217254, 0.58669705, 0.7203828},
+                new double[] {-0.0217254, 0.08669705, 0.7203828},
+                new double[] {-0.3217254, 0.38669705, 0.7203828},
                 new double[] {-0.4217254, 0.58669705, 0.7203828},
                 new double[] {-0.5217254, 0.58669705, 0.7203828},
                 new double[] {-0.6217254, 0.58669705, 0.7203828},
-                new double[] {-0.7217254, 0.58669705, 0.7203828}
+                new double[] {-0.7217254, 0.38669705, 0.7203828}
             };
         }
 
@@ -221,9 +221,9 @@ namespace WenViz
         {
            this.STARTING_ORIGINS = new double[][]
             {
-                new double[] {-0.2217254, 0.58669705, 0.7203828},
-                new double[] {-0.8217254, 0.58669705, 0.7203828},
-                new double[] {-0.3217254, 0.58669705, 0.7203828},
+                new double[] {-0.0217254, 0.08669705, 0.7203828},
+                new double[] {-0.0217254, 0.08669705, 0.7203828},
+                new double[] {-0.3217254, 0.38669705, 0.7203828},
                 new double[] {-0.4217254, 0.58669705, 0.7203828},
                 new double[] {-0.5217254, 0.58669705, 0.7203828},
                 new double[] {-0.6217254, 0.58669705, 0.7203828}
@@ -764,6 +764,8 @@ namespace WenViz
                     numberOfMoves = 0;
                     currentRowOfAngles = 0;
                     currentJointToMove = 0;
+                    currentPositions = startingPositions;
+                    Debug.WriteLine("Resetting");
                 }
 
                 float angle = this.armRotationAngles[currentRowOfAngles][currentJointToMove];
@@ -832,9 +834,6 @@ namespace WenViz
 
         public void SetUpPositionUpdater() {
             
-            //set up updated positions and current positions 
-            //set up an updated origins ds
-            //set up current origins ds
             this.currentPositions = startingPositions;
             this.currentOrigins = STARTING_ORIGINS;
             this.currentRowOfAngles = 0;
@@ -911,36 +910,8 @@ namespace WenViz
                         toolong = CalculateCurrentDistance(joint-1, joint) > relativeJointDistances[joint-1];
                         Debug.WriteLine("new distance"+ CalculateCurrentDistance(joint-1, joint));
                     }
-
-                    //find line
-                    //move along the line toward new point
                     }                                                                                                                           
                 }
-            /*
-                planeType = determineRotationAxis(planeTypes[joint]);
-                //double[] origin = currentOrigins[currentJointToMove];
-            //grabbing array of current x, y, z positions from current positions array -- which contains all positions
-                double[] currentJointXYZPositions2 = this.currentPositions[joint];
-            if (planeType == 0) //Y,Z plane
-            {
-                //nextPositions = rotateByAngle(angle, assign x=y and y=z, z=x )
-                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[1], origin[2], origin[0], currentJointXYZPositions2[1], currentJointXYZPositions2[2], currentJointXYZPositions2[0]);
-                
-            }
-
-            if (planeType == 1) //X,Z plane:
-            {
-                //assign x=x, y=z, z=y
-                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[0], origin[2], origin[1], currentJointXYZPositions2[0], currentJointXYZPositions2[2], currentJointXYZPositions2[1]);
-            }
-
-            if (planeType == 2) //x, y PLANE
-            {
-                //ASSIGN x=x. y=y, z=z
-                updatedPositions = rotateByAngle(planeType,  (30*Math.PI)/180, origin[0], origin[1], origin[2], currentJointXYZPositions2[0], currentJointXYZPositions2[1], currentJointXYZPositions2[2]);
-            }   
-            
-            }*/
 
             //update origins
 
