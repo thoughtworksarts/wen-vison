@@ -207,12 +207,12 @@ namespace WenViz
         {
            this.startingPositions = new double[][]
             {
-                new double[] {-0.3517254, 0.09669705, 0.7703828},
-                new double[] {-0.3217254, 0.08669705, 0.7203828},
-                new double[] {-0.4517254, 0.09569705, 0.7708828},
-                new double[] {-0.5517254, 0.09629705, 0.6703828},
-                new double[] {-0.3017254, 0.08669705, 0.7703828},
-                new double[] {-0.4517254, 0.09669705, 0.7503828}
+                new double[] {-0.2217254, 0.58669705, 0.7203828},
+                new double[] {-0.3217254, 0.58669705, 0.7203828},
+                new double[] {-0.4217254, 0.58669705, 0.7203828},
+                new double[] {-0.5217254, 0.58669705, 0.7203828},
+                new double[] {-0.6217254, 0.58669705, 0.7203828},
+                new double[] {-0.7217254, 0.58669705, 0.7203828}
             };
         }
 
@@ -221,12 +221,12 @@ namespace WenViz
         {
            this.STARTING_ORIGINS = new double[][]
             {
-                new double[] {-0.3517254, 0.09669705, 0.7703828},
-                new double[] {-0.3517254, 0.09669705, 0.7703828},
-                new double[] {-0.3217254, 0.08669705, 0.7203828},
-                new double[] {-0.4517254, 0.09569705, 0.7708828},
-                new double[] {-0.5517254, 0.09629705, 0.6703828},
-                new double[] {-0.3017254, 0.08669705, 0.7703828}
+                new double[] {-0.2217254, 0.58669705, 0.7203828},
+                new double[] {-0.2217254, 0.58669705, 0.7203828},
+                new double[] {-0.3217254, 0.58669705, 0.7203828},
+                new double[] {-0.4217254, 0.58669705, 0.7203828},
+                new double[] {-0.5217254, 0.58669705, 0.7203828},
+                new double[] {-0.6217254, 0.58669705, 0.7203828}
             };
         }
 
@@ -862,35 +862,35 @@ namespace WenViz
             if (planeType == 0) //Y,Z plane
             {
                 //nextPositions = rotateByAngle(angle, assign x=y and y=z, z=x )
-                updatedPositions = rotateByAngle(angle, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
+                updatedPositions = rotateByAngle((float) 0, origin[1], origin[2], origin[0], currentJointXYZPositions[1], currentJointXYZPositions[2], currentJointXYZPositions[0]);
                 
 }
 
             if (planeType == 1) //X,Z plane:
             {
                 //assign x=x, y=z, z=y
-                updatedPositions = rotateByAngle(angle, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
+                updatedPositions = rotateByAngle((float) 0, origin[0], origin[2], origin[1], currentJointXYZPositions[0], currentJointXYZPositions[2], currentJointXYZPositions[1]);
             }
 
             if (planeType == 2) //x, y PLANE
             {
                 //ASSIGN x=x. y=y, z=z
-                updatedPositions = rotateByAngle(angle, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
+                updatedPositions = rotateByAngle((float) 0, origin[0], origin[1], origin[2], currentJointXYZPositions[0], currentJointXYZPositions[1], currentJointXYZPositions[2]);
             }
 
             for (int i=0; i<3; i++) {
-                currentPositions[currentJointToMove][i] = updatedPositions[i];
+                //currentPositions[currentJointToMove][i] = updatedPositions[i];
             }
 
             //updateadjacentPoints loop
             for (int joint=currentJointToMove; joint<5; joint++) {
-                updateAdjacentJoint(joint, joint+1);
+                //updateAdjacentJoint(joint, joint+1);
             }
 
             //update origins
 
             for (int jointNumber = 2; jointNumber<6; jointNumber++) {
-                currentOrigins[jointNumber] = currentPositions[jointNumber-1];
+                //currentOrigins[jointNumber] = currentPositions[jointNumber-1];
             }
 
         }
@@ -922,6 +922,7 @@ namespace WenViz
             updatedPointCoordinates.SetValue(nextPointY, 1);
             updatedPointCoordinates.SetValue(nextPointZ, 2);
 
+            
             return updatedPointCoordinates;
         }
 
